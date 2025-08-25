@@ -24,12 +24,17 @@ onMounted(() => {
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
 const onPublish = () => {
-  console.log({chatContent:chatContent.value});
+  // 入力内容の前後の空白を削除
+  const message = chatContent.value.trim()
 
-  socket.emit("publishEvent", `${userName.value}さん：${chatContent.value}`)
+  // メッセージが空文字でなければ、サーバーに送信する
+  if (message) {
+    console.log({chatContent: message});
+    socket.emit("publishEvent", `${userName.value}さん：${message}`)
 
-  // 入力欄を初期化
-  chatContent.value = ""
+    // 入力欄を初期化
+    chatContent.value = ""
+  }
 }
 
 // 退室メッセージをサーバに送信する
