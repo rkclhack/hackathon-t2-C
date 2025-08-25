@@ -1,4 +1,4 @@
 <template>
   <h1>Sample2</h1>
-  <p>Hello World!</p>
+  <p>Vue.js!</p>
 </template>
