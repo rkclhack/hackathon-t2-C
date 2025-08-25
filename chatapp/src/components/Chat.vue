@@ -32,8 +32,7 @@ const onPublish = (event) => {
 
   // メッセージが空文字でなければ、サーバーに送信する
   if (message) {
-    console.log({chatContent: message});
-    socket.emit("publishEvent", `${userName.value}さん：${message}`)
+    socket.emit("publishEvent", { type: "publish", name: userName.value, content: chatContent.value })
 
     // 入力欄を初期化
     chatContent.value = ""
@@ -42,13 +41,13 @@ const onPublish = (event) => {
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
-  socket.emit("exitEvent", `${userName.value}さんが退室しました。`)
+  socket.emit("exitEvent", { type: "exit", name: userName.value })
 }
 
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-  chatList.unshift(`${userName.value}さんのメモ：${chatContent.value}`)
+  chatList.unshift({ type: "memo", name: userName.value, content: chatContent.value })
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -112,7 +111,20 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+            <div v-if="chat.type === 'enter'">
+              {{ chat.name }}が入室しました。
+            </div>
+            <div v-if="chat.type === 'exit'">
+              {{ chat.name }}が退室しました。
+            </div>
+            <div v-if="chat.type === 'publish'">
+              {{ chat.name }}：{{ chat.content }}
+            </div>
+            <div v-if="chat.type === 'memo'">
+              {{ chat.name }}のメモ：{{ chat.content }}
+            </div>
+          </li>
         </ul>
       </div>
     </div>
@@ -134,7 +146,20 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+            <div v-if="chat.type === 'enter'">
+              {{ chat.name }}が入室しました。
+            </div>
+            <div v-if="chat.type === 'exit'">
+              {{ chat.name }}が退室しました。
+            </div>
+            <div v-if="chat.type === 'publish'">
+              {{ chat.name }}：{{ chat.content }}
+            </div>
+            <div v-if="chat.type === 'memo'">
+              {{ chat.name }}のメモ：{{ chat.content }}
+            </div>
+          </li>
         </ul>
       </div>
     </div>
