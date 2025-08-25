@@ -20,7 +20,7 @@
   // 入室メッセージをクライアントに送信する
   const onEnter = () => {
     // ユーザー名が入力されているかチェック
-    if (inputUserName.value !== "") {
+    if (inputUserName.value === "") {
       alert("ユーザー名を入力してください")
       return
     }
@@ -39,7 +39,7 @@
     <h1 class="text-h3 font-weight-medium">Vue.js Chat サンプル</h1>
     <div class="mt-10">
       <p>ユーザー名</p>
-      <input type="text" class="user-name-text" />
+      <input type="text" class="user-name-text" v-model="inputUserName" />
     </div>
     <button type="button" @click="onEnter" class="button-normal">入室する</button>
   </div>
