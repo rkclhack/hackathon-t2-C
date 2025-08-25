@@ -23,9 +23,12 @@ onMounted(() => {
 
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
-const onPublish = () => {
+const onPublish = (event) => {
   // 入力内容の前後の空白を削除
   const message = chatContent.value.trim()
+
+  // Ctrl + Enter で送信
+  if (event instanceof KeyboardEvent && !event.ctrlKey) return;
 
   // メッセージが空文字でなければ、サーバーに送信する
   if (message) {
@@ -102,7 +105,7 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
@@ -124,7 +127,7 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
