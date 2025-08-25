@@ -1,6 +1,7 @@
 <script setup>
-import { inject, ref, reactive, onMounted } from "vue"
+import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
 import socketManager from '../socketManager.js'
+import PipChat from "./PipChat.vue"
 
 // #region global state
 const userName = inject("userName")
@@ -83,10 +84,39 @@ const registerSocketEvent = () => {
   })
 }
 // #endregion
+
+const pipRef = useTemplateRef("pipRef")
+const openPip = async () => {
+  const pipWindow = await window.documentPictureInPicture.requestWindow({
+  });
+  pipWindow.document.body.append(pipRef.value);
+}
 </script>
 
 <template>
   <div class="mx-auto my-5 px-4">
+    <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
+    <div class="mt-10">
+      <p>ログインユーザ：{{ userName }}さん</p>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"></textarea>
+      <div class="mt-5">
+        <button class="button-normal" @click="onPublish">投稿</button>
+        <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+      </div>
+      <div class="mt-5" v-if="chatList.length !== 0">
+        <ul>
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
+        </ul>
+      </div>
+    </div>
+    <router-link to="/" class="link">
+      <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
+    </router-link>
+  </div>
+  <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
+
+  <!-- Picture-in-Picture -->
+  <div ref="pipRef" class="mx-auto my-5 px-4">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
