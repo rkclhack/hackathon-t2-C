@@ -1,7 +1,6 @@
 <script setup>
 import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
 import socketManager from '../socketManager.js'
-import PipChat from "./PipChat.vue"
 
 // #region global state
 const userName = inject("userName")
