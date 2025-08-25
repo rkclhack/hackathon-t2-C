@@ -1,34 +1,37 @@
 <script setup>
-import { inject, ref } from "vue"
-import { useRouter } from "vue-router"
-import socketManager from '../socketManager.js'
+  import { inject, ref } from "vue"
+  import { useRouter } from "vue-router"
+  import socketManager from '../socketManager.js'
 
-// #region global state
-const userName = inject("userName")
-// #endregion
+  // #region global state
+  const userName = inject("userName")
+  // #endregion
 
-// #region local variable
-const router = useRouter()
-const socket = socketManager.getInstance()
-// #endregion
+  // #region local variable
+  const router = useRouter()
+  const socket = socketManager.getInstance()
+  // #endregion
 
-// #region reactive variable
-const inputUserName = ref("")
-// #endregion
+  // #region reactive variable
+  const inputUserName = ref("")
+  // #endregion
 
-// #region browser event handler
-// 入室メッセージをクライアントに送信する
-const onEnter = () => {
-  // ユーザー名が入力されているかチェック
-
-  // 入室メッセージを送信
-
-  // 全体で使用するnameに入力されたユーザー名を格納
-
-  // チャット画面へ遷移
-  router.push({ name: "chat" })
-}
-// #endregion
+  // #region browser event handler
+  // 入室メッセージをクライアントに送信する
+  const onEnter = () => {
+    // ユーザー名が入力されているかチェック
+    if (inputUserName.value === "") {
+      alert("ユーザー名を入力してください")
+      return
+    }
+    // 入室メッセージを送信
+    socket.emit("enterEvent", inputUserName.value)
+    // 全体で使用するnameに入力されたユーザー名を格納
+    userName.value = inputUserName.value
+    // チャット画面へ遷移
+    router.push({ name: "chat" })
+  }
+  // #endregion
 </script>
 
 <template>
@@ -43,9 +46,9 @@ const onEnter = () => {
 </template>
 
 <style scoped>
-.user-name-text {
-  width: 200px;
-  border: 1px solid #888;
-  margin-bottom: 16px;
-}
+  .user-name-text {
+    width: 200px;
+    border: 1px solid #888;
+    margin-bottom: 16px;
+  }
 </style>
