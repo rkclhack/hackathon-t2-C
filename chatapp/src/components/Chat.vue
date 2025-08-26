@@ -1,10 +1,13 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
+import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // coputed追加
 import socketManager from '../socketManager.js'
+import { marked } from "marked"
+
+// markedの改行オプションをtrueに設定
+marked.setOptions({ breaks: true });
 
 // #region global state
 const userName = inject("userName")
-// #endregion
 
 // #region local variable
 const socket = socketManager.getInstance()
@@ -14,6 +17,10 @@ const socket = socketManager.getInstance()
 const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
+
+const markdown = computed(() => {
+  return marked.parse(chatContent.value)
+});
 
 // #region lifecycle
 onMounted(() => {
@@ -35,13 +42,12 @@ const onPublish = (event) => {
     socket.emit("publishEvent", {
       type: "publish",
       name: userName.value,
-      content: chatContent.value,
+      content: markdown.value,
       datetime: Date.now()
     })
   }
-    // 入力欄を初期化
-    chatContent.value = ""
-  
+  // 入力欄を初期化
+  chatContent.value = ""
 }
 
 // 退室メッセージをサーバに送信する
@@ -97,14 +103,30 @@ const registerSocketEvent = () => {
   socket.on("publishEvent", (data) => {
     onReceivePublish(data);
   })
+
+  // 履歴イベントを受け取ったら実行
+  socket.on("historyEvent", (data) => {
+    // 履歴を画面上に表示
+    data.forEach((chat) => {
+      chatList.unshift(chat)
+    })
+  })
 }
 // #endregion
 
 const pipRef = useTemplateRef("pipRef")
+// Picture-in-Picture 状態
+const pipStatus = ref(false)
 const openPip = async () => {
   const pipWindow = await window.documentPictureInPicture.requestWindow({
   });
   pipWindow.document.body.append(pipRef.value);
+  pipStatus.value = true;
+  // Picture-in-Picture 終了時のイベント登録
+  pipWindow.addEventListener('pagehide', (event) => {
+    pipStatus.value = false;
+    document.body.append(pipRef.value);
+  });
 }
 </script>
 
@@ -113,7 +135,8 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
@@ -132,7 +155,8 @@ const openPip = async () => {
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
@@ -147,11 +171,13 @@ const openPip = async () => {
   </div>
   <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
-  <div ref="pipRef" class="mx-auto my-5 px-4">
+  <!-- Picture-in-Picture -->
+  <div ref="pipRef" class="mx-auto my-5 px-4" v-show="pipStatus">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
@@ -169,7 +195,8 @@ const openPip = async () => {
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
