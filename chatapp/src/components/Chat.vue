@@ -65,7 +65,7 @@ const onExit = () => {
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-  chatList.unshift({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
+  chatList.push({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -75,19 +75,19 @@ const onMemo = () => {
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 // #endregion
@@ -118,7 +118,7 @@ const registerSocketEvent = () => {
   socket.on("historyEvent", (data) => {
     // 履歴を画面上に表示
     data.forEach((chat) => {
-      chatList.unshift(chat)
+      chatList.push(chat)
     })
   })
 }
