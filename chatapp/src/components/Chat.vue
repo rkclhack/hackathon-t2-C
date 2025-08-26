@@ -143,7 +143,8 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
@@ -181,7 +182,8 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
             </span>
@@ -227,5 +229,11 @@ const openPip = async () => {
 .button-exit {
   color: #000;
   margin-top: 8px;
+}
+
+.my-message {
+  background-color: lightyellow;
+  padding: 8px;
+  border-radius: 4px;
 }
 </style>
