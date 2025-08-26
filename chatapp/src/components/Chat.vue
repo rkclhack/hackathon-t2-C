@@ -21,6 +21,9 @@ const chatList = reactive([])
 // 各メンバーの状態
 const memberStatus = ref([])
 
+// 休憩中かどうか
+const isIdling = ref(false)
+
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
 });
@@ -67,6 +70,7 @@ const onIdle = () => {
   socket.emit("idleEvent", {
     type: "idle",
     name: userName.value,
+    isIdling: isIdling.value,
     datetime: Date.now()
   })
 }
@@ -192,7 +196,10 @@ const onPipOut = (event) => {
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
-        <button class="button-normal util-ml-8px" @click="onIdle">休憩に入る</button>
+        <button class="button-normal util-ml-8px" @click="onIdle">
+          <template v-if="isIdling">休憩に入る</template>
+          <template v-else>休憩から戻る</template>
+        </button>
       </div>
       <div>
         <ul>
@@ -214,9 +221,14 @@ const onPipOut = (event) => {
             <span v-if="chat.type === 'exit'">
               {{ chat.name }}が退室しました。
             </span>
-            <span v-if="chat.type === 'idle'">
-              {{ chat.name }}が休憩に入りました。
-            </span>
+            <template v-if="chat.type === 'idle'">
+              <span v-if="chat.isIdling">
+                {{ chat.name }}が休憩に入りました。
+              </span>
+              <span v-else>
+                {{ chat.name }}が休憩から戻りました。
+              </span>
+            </template>
             <span v-if="chat.type === 'publish'">
               {{ chat.name }}：
               <span v-html="chat.content"></span>

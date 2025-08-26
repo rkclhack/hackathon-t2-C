@@ -17,9 +17,9 @@ const exitRoom = (name) => {
   memberStatus[name] = "Inactive";
 }
 
-// 休憩中にする
-const toggleIdleMemeber = (name) => {
-  memberStatus[name] = "Idle";
+// 休憩中を切り返す
+const toggleIdleMemeber = (name, isIdling) => {
+  memberStatus[name] = isIdling ? "Idle" : "Active";
 }
 
 const getMemberStatus = () => {
@@ -46,7 +46,7 @@ export default (io, socket) => {
 
   // 休憩メッセージをクライアントに送信する
   socket.on("idleEvent", (data) => {
-    idleMemeber(data.name);
+    idleMemeber(data.name, data.isIdling);
 
     history.push(data) // 履歴に追加
     socket.emit("idleEvent", data)
