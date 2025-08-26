@@ -73,18 +73,25 @@ const onMemo = () => {
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 // #endregion
+
+const onUpdateChatList = () => {
+  // jumpToBottom()
+}
 
 // #region local methods
 // イベント登録をまとめる
@@ -114,6 +121,17 @@ const registerSocketEvent = () => {
 }
 // #endregion
 
+
+const jumpToBottom = () => {
+  console.log("jumpToBottom");
+  // textareaまで移動する
+  const textarea = document.querySelector("#pip-textarea");
+  if (!textarea) return;
+  const target = textarea.getBoundingClientRect().bottom;
+  console.log("jump to " + target);
+  // scrollTo(0, target);
+}
+
 const pipRef = useTemplateRef("pipRef")
 const styles = document.head.cloneNode(true).querySelectorAll("style") // headの全てのstyle要素を取得
 const head_scripts = document.head.cloneNode(true).querySelectorAll("script") // headの全てのscript要素を取得
@@ -135,6 +153,26 @@ const openPip = async () => {
     pipStatus.value = false;
     document.body.append(pipRef.value);
   });
+
+  const messageContainer = pipWindow.document.querySelector(".message-container");
+  console.log(messageContainer);
+  messageContainer.onresize = (event) => {
+    console.log("RESIZED", event);
+  };
+  pipWindow.document.addEventListener("resize", (event) => {
+    console.log("RESIZED", event);
+  });
+
+  let lastChildElementCount = 0;
+  pipWindow.setInterval(() => {
+    const ms = pipWindow.document.querySelector(".message-container");
+    if (!ms) return;
+    const currentChildElementCount = ms.childElementCount;
+    if (currentChildElementCount !== lastChildElementCount) {
+      lastChildElementCount = currentChildElementCount;
+      ms.scroll(0, 99999);
+    }
+  }, 100);
 }
 
 const mouseoverPip = ref(false);
@@ -149,6 +187,7 @@ const onPipOut = (event) => {
 <template>
   <div class="mx-auto my-5 px-4">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
+    <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
       <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
@@ -183,35 +222,30 @@ const onPipOut = (event) => {
       <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
     </router-link>
   </div>
-  <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
   <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut">
-    <div class="pipFlex">
-      <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
-            <span v-if="chat.type === 'enter'">
-              {{ chat.name }}が入室しました。
-            </span>
-            <span v-if="chat.type === 'exit'">
-              {{ chat.name }}が退室しました。
-            </span>
-            <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：
-              <span v-html="chat.content"></span>
-            </span>
-            <span v-if="chat.type === 'memo'">
-              {{ chat.name }}のメモ：{{ chat.content }}
-            </span>
-          </li>
-        </ul>
-      </div>
+  <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper">
+    <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
+      <ul class="message-container" v-if="chatList.length !== 0">
+        <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+          :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
+          <span v-if="chat.type === 'enter'">
+            {{ chat.name }}が入室しました。
+          </span>
+          <span v-if="chat.type === 'exit'">
+            {{ chat.name }}が退室しました。
+          </span>
+          <span v-if="chat.type === 'publish'">
+            {{ chat.name }}：
+            <span v-html="chat.content"></span>
+          </span>
+          <span v-if="chat.type === 'memo'">
+            {{ chat.name }}のメモ：{{ chat.content }}
+          </span>
+        </li>
+      </ul>
       <div class="pipInputArea" v-show="mouseoverPip">
-        <p>ログインユーザ：{{ userName }}さん</p>
-        <textarea variant="outlined" placeholder="投稿文を入力してください" rows="2" class="area" v-model="chatContent"
+        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="area" v-model="chatContent"
           @keydown.enter="onPublish"></textarea>
       </div>
     </div>
@@ -244,12 +278,28 @@ const onPipOut = (event) => {
 
 .pipWrapper {
   height: 100%;
+  max-height: 100%;
 }
 
-.pipFlex {
+.pipFlexLayout {
   display: flex;
   flex-direction: column;
+  height: calc(100% - 40px);
+  min-height: 0;
+  /* position: relative; */
+}
+
+.message-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  flex-direction: column;
   justify-content: flex-end;
+  min-height: 0;
+}
+
+.pipInputArea {
+  width: 100%;
+  position: relative;
 }
 
 .my-message {
