@@ -185,26 +185,69 @@ const onPipOut = (event) => {
 }
 </script>
 
-<template><v-app class="app">
-  <v-app-bar app color="black" dark>
-    <v-btn icon @click="onExit" to="/">
-      <v-icon>mdi-logout</v-icon>
-    </v-btn>
-    <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
-    <p>ログインユーザ：{{ userName }}さん</p>
-    <v-btn fixed bottom right color="white" @click="openPip">
+<template>
+  <v-app class="app">
+    <v-app-bar app color="black" dark>
+      <v-btn icon @click="onExit" to="/">
+        <v-icon>mdi-logout</v-icon>
+      </v-btn>
+      <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
+      <p>ログインユーザ：{{ userName }}さん</p>
+    </v-app-bar>
+
+    <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
+      <div class="mt-10">
+        <div class="mt-5" v-if="chatList.length !== 0">
+          <ul>
+            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+              :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
+              <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
+              <span v-if="chat.type === 'enter'">
+                {{ chat.name }}が入室しました。
+              </span>
+              <span v-if="chat.type === 'exit'">
+                {{ chat.name }}が退室しました。
+              </span>
+              <span v-if="chat.type === 'publish'">
+                {{ chat.name }}：
+                <span v-html="chat.content"></span>
+              </span>
+              <span v-if="chat.type === 'memo'">
+                {{ chat.name }}のメモ：{{ chat.content }}
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="input-row">
+          <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+            @keydown.enter="onPublish"></textarea>
+          <div class="btn-vert">
+
+            <v-btn color="#007FD4" style="margin-left: 5px;" @click="onPublish">
+              <v-icon right>mdi-send</v-icon>
+            </v-btn>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <v-btn fixed bottom right color="#007FD4" @click="openPip" class="float-btn">
       <v-icon>mdi-open-in-new</v-icon>
     </v-btn>
-  </v-app-bar>
 
 
-  <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
-    <div class="mt-10">
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
+    <!-- Picture-in-Picture -->
+    <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
+      <div class="font-slider-container">
+        <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
+      </div>
+      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
+        <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
             :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
-            <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
             </span>
@@ -220,56 +263,19 @@ const onPipOut = (event) => {
             </span>
           </li>
         </ul>
-      </div>
-
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
-        @keydown.enter="onPublish"></textarea>
-      <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
-        <v-icon right>mdi-send</v-icon>
-      </v-btn>
-
-    </div>
-
-
-  </div>
-
-  <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
-    <div class="font-slider-container">
-      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
-    </div>
-    <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
-      <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
-        <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-          :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
-          <span v-if="chat.type === 'enter'">
-            {{ chat.name }}が入室しました。
-          </span>
-          <span v-if="chat.type === 'exit'">
-            {{ chat.name }}が退室しました。
-          </span>
-          <span v-if="chat.type === 'publish'">
-            {{ chat.name }}：
-            <span v-html="chat.content"></span>
-          </span>
-          <span v-if="chat.type === 'memo'">
-            {{ chat.name }}のメモ：{{ chat.content }}
-          </span>
-        </li>
-      </ul>
-      <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
-        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
-          @keydown.enter="onPublish"></textarea>
-        <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
-          <v-icon right>mdi-send</v-icon>
-        </v-btn>
+        <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
+          <div class="input-row">
+            <textarea :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
+              @keydown.enter="onPublish"></textarea>
+            <v-btn color="#007FD4" class="send-btn" @click="onPublish">
+              <v-icon right>mdi-send</v-icon>
+            </v-btn>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-
-
-</v-app></template>
+  </v-app>
+</template>
 
 <style scoped>
 .link {
@@ -278,11 +284,14 @@ const onPipOut = (event) => {
 
 .area {
   width: 500px;
-  border: 3px solid #007FD4;
-  margin-top: 8px;
+  border: 0;
   background-color: #9E9E9E;
   color: white;
   border-radius: 5px;
+}
+
+.area:focus {
+  outline: 3px solid #007FD4;
 }
 
 .item {
@@ -374,12 +383,51 @@ const onPipOut = (event) => {
   cursor: pointer;
 }
 
+.input-row {
+  margin-top: 1em;
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
 .inpArea {
-  width: 70vw;
-  border: 3px solid #007FD4;
-  margin-top: 8px;
+  width: calc(100% - 120px);
+  border: 0;
   background-color: #9E9E9E;
   color: white;
   border-radius: 5px;
+  min-width: 0;
+}
+
+.inpArea:focus {
+  outline: 3px solid #007FD4;
+}
+
+.send-btn {
+  display: flex;
+  align-items: center;
+}
+
+.btn-vert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.float-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+
+  height: 70px !important;
+  width: 70px !important;
+  border-radius: 100px;
+  font-size: 1.5em;
+  color: white;
+}
+
+.float-btn:hover {
+  transform: scale(1.1);
 }
 </style>
