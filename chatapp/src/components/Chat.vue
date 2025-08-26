@@ -1,10 +1,13 @@
 <script setup>
-  import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
+  import { inject, ref, reactive, onMounted, useTemplateRef, computed} from "vue" // coputed追加
   import socketManager from '../socketManager.js'
+  import { marked } from "marked"
+
+  // markedの改行オプションをtrueに設定
+  marked.setOptions({breaks : true});
 
   // #region global state
   const userName = inject("userName")
-  // #endregion
 
   // #region local variable
   const socket = socketManager.getInstance()
@@ -14,6 +17,10 @@
   const chatContent = ref("")
   const chatList = reactive([])
   // #endregion
+
+  const markdown = computed(() => {
+    return marked.parse(chatContent.value)
+  });
 
   // #region lifecycle
   onMounted(() => {
@@ -35,13 +42,12 @@
       socket.emit("publishEvent", {
         type: "publish",
         name: userName.value,
-        content: chatContent.value,
+        content: markdown.value,
         datetime: Date.now()
       })
     }
     // 入力欄を初期化
     chatContent.value = ""
-
   }
 
   // 退室メッセージをサーバに送信する
@@ -138,7 +144,8 @@
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
@@ -174,7 +181,8 @@
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
