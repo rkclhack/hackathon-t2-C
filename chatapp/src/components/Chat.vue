@@ -18,8 +18,7 @@ const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
 
-// ★追加：PiPウィンドウのフォントサイズを管理するリアクティブ変数
-const pipFontSize = ref(16); // 初期値は適宜調整してください
+const pipFontSize = ref(16);
 
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
@@ -251,7 +250,7 @@ const onPipOut = (event) => {
 
 .pipWrapper {
   height: 100%;
-  position: relative; /* ★変更③：スライダーを配置する基準にするため、position: relativeを追加 */
+  position: relative;
 }
 
 .pipFlex {
@@ -265,9 +264,6 @@ const onPipOut = (event) => {
   padding: 8px;
   border-radius: 4px;
 }
-
-/* ★★★★★ 以下、追加したスタイル ★★★★★ */
-/* 既存のスタイルには一切変更を加えていません */
 
 /* スライダーを配置するためのコンテナ */
 .font-slider-container {
