@@ -42,7 +42,7 @@
       socket.emit("publishEvent", {
         type: "publish",
         name: userName.value,
-        content: chatContent.value,
+        content: markdown.value,
         datetime: Date.now()
       })
     }
@@ -55,7 +55,6 @@
     socket.emit("exitEvent", {
       type: "exit",
       name: userName.value,
-      content: markdown.value, // chatContentからmarkdownに変更
       datetime: Date.now()
     })
   }
