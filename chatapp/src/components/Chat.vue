@@ -1,111 +1,119 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
-import socketManager from '../socketManager.js'
+  import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
+  import socketManager from '../socketManager.js'
 
-// #region global state
-const userName = inject("userName")
-// #endregion
+  // #region global state
+  const userName = inject("userName")
+  // #endregion
 
-// #region local variable
-const socket = socketManager.getInstance()
-// #endregion
+  // #region local variable
+  const socket = socketManager.getInstance()
+  // #endregion
 
-// #region reactive variable
-const chatContent = ref("")
-const chatList = reactive([])
-// #endregion
+  // #region reactive variable
+  const chatContent = ref("")
+  const chatList = reactive([])
+  // #endregion
 
-// #region lifecycle
-onMounted(() => {
-  registerSocketEvent()
-})
-// #endregion
+  // #region lifecycle
+  onMounted(() => {
+    registerSocketEvent()
+  })
+  // #endregion
 
-// #region browser event handler
-// 投稿メッセージをサーバに送信する
-const onPublish = (event) => {
-  // 入力内容の前後の空白を削除
-  const message = chatContent.value.trim()
+  // #region browser event handler
+  // 投稿メッセージをサーバに送信する
+  const onPublish = (event) => {
+    // 入力内容の前後の空白を削除
+    const message = chatContent.value.trim()
 
-  // Ctrl + Enter で送信
-  if (event instanceof KeyboardEvent && !event.ctrlKey) return;
+    // Ctrl + Enter で送信
+    if (event instanceof KeyboardEvent && !event.ctrlKey) return;
 
-  // メッセージが空文字でなければ、サーバーに送信する
-  if (message) {
-    socket.emit("publishEvent", {
-      type: "publish",
+    // メッセージが空文字でなければ、サーバーに送信する
+    if (message) {
+      socket.emit("publishEvent", {
+        type: "publish",
+        name: userName.value,
+        content: chatContent.value,
+        datetime: Date.now()
+      })
+    }
+    // 入力欄を初期化
+    chatContent.value = ""
+
+  }
+
+  // 退室メッセージをサーバに送信する
+  const onExit = () => {
+    socket.emit("exitEvent", {
+      type: "exit",
       name: userName.value,
-      content: chatContent.value,
       datetime: Date.now()
     })
   }
+
+  // メモを画面上に表示する
+  const onMemo = () => {
+    // メモの内容を表示
+    chatList.unshift({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
+
     // 入力欄を初期化
     chatContent.value = ""
-  
-}
+  }
+  // #endregion
 
-// 退室メッセージをサーバに送信する
-const onExit = () => {
-  socket.emit("exitEvent", {
-    type: "exit",
-    name: userName.value,
-    datetime: Date.now()
-  })
-}
+  // #region socket event handler
+  // サーバから受信した入室メッセージ画面上に表示する
+  const onReceiveEnter = (data) => {
+    chatList.unshift(data)
+  }
 
-// メモを画面上に表示する
-const onMemo = () => {
-  // メモの内容を表示
-  chatList.unshift({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
+  // サーバから受信した退室メッセージを受け取り画面上に表示する
+  const onReceiveExit = (data) => {
+    chatList.unshift(data)
+  }
 
-  // 入力欄を初期化
-  chatContent.value = ""
-}
-// #endregion
+  // サーバから受信した投稿メッセージを画面上に表示する
+  const onReceivePublish = (data) => {
+    chatList.unshift(data)
+  }
+  // #endregion
 
-// #region socket event handler
-// サーバから受信した入室メッセージ画面上に表示する
-const onReceiveEnter = (data) => {
-  chatList.unshift(data)
-}
+  // #region local methods
+  // イベント登録をまとめる
+  const registerSocketEvent = () => {
+    // 入室イベントを受け取ったら実行
+    socket.on("enterEvent", (data) => {
+      onReceiveEnter(data);
+    })
 
-// サーバから受信した退室メッセージを受け取り画面上に表示する
-const onReceiveExit = (data) => {
-  chatList.unshift(data)
-}
+    // 退室イベントを受け取ったら実行
+    socket.on("exitEvent", (data) => {
+      onReceiveExit(data);
+    })
 
-// サーバから受信した投稿メッセージを画面上に表示する
-const onReceivePublish = (data) => {
-  chatList.unshift(data)
-}
-// #endregion
+    // 投稿イベントを受け取ったら実行
+    socket.on("publishEvent", (data) => {
+      onReceivePublish(data);
+    })
 
-// #region local methods
-// イベント登録をまとめる
-const registerSocketEvent = () => {
-  // 入室イベントを受け取ったら実行
-  socket.on("enterEvent", (data) => {
-    onReceiveEnter(data);
-  })
+    // 履歴イベントを受け取ったら実行
+    socket.on("historyEvent", (data) => {
+      // 履歴を画面上に表示
+      data.forEach((chat) => {
+        chatList.unshift(chat)
+      })
+    })
+  }
+  // #endregion
 
-  // 退室イベントを受け取ったら実行
-  socket.on("exitEvent", (data) => {
-    onReceiveExit(data);
-  })
-
-  // 投稿イベントを受け取ったら実行
-  socket.on("publishEvent", (data) => {
-    onReceivePublish(data);
-  })
-}
-// #endregion
-
-const pipRef = useTemplateRef("pipRef")
-const openPip = async () => {
-  const pipWindow = await window.documentPictureInPicture.requestWindow({
-  });
-  pipWindow.document.body.append(pipRef.value);
-}
+  const pipRef = useTemplateRef("pipRef")
+  const openPip = async () => {
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
+    });
+    pipWindow.document.body.append(pipRef.value);
+  }
 </script>
 
 <template>
@@ -113,7 +121,8 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
@@ -149,7 +158,8 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
@@ -180,26 +190,26 @@ const openPip = async () => {
 </template>
 
 <style scoped>
-.link {
-  text-decoration: none;
-}
+  .link {
+    text-decoration: none;
+  }
 
-.area {
-  width: 500px;
-  border: 1px solid #000;
-  margin-top: 8px;
-}
+  .area {
+    width: 500px;
+    border: 1px solid #000;
+    margin-top: 8px;
+  }
 
-.item {
-  display: block;
-}
+  .item {
+    display: block;
+  }
 
-.util-ml-8px {
-  margin-left: 8px;
-}
+  .util-ml-8px {
+    margin-left: 8px;
+  }
 
-.button-exit {
-  color: #000;
-  margin-top: 8px;
-}
+  .button-exit {
+    color: #000;
+    margin-top: 8px;
+  }
 </style>
