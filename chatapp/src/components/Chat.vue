@@ -207,13 +207,10 @@ const openPip = async () => {
   color: #000;
   margin-top: 8px;
 }
-
-/* ▼▼▼ 変更点3 ▼▼▼ */
-/* 自分自身の投稿とメモに適用するスタイルを追加 */
+ss
 .my-message {
-  background-color: lightyellow; /* 背景を薄い黄色に */
-  padding: 8px;                  /* 見栄えのため少し余白を追加 */
-  border-radius: 4px;            /* 角を少し丸くする */
+  background-color: lightyellow;
+  padding: 8px;
+  border-radius: 4px;
 }
-/* ▲▲▲ 変更点3 ▲▲▲ */
 </style>
