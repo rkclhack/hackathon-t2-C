@@ -36,6 +36,10 @@
     router.push({ name: "chat" })
   }
   // #endregion
+
+// テスト用
+inputUserName.value = "テスター"
+onEnter()
 </script>
 
 <template>
