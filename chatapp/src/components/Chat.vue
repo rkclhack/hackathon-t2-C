@@ -18,6 +18,9 @@ const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
 
+// 各メンバーの状態
+const memberStatus = ref([])
+
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
 });
@@ -69,6 +72,17 @@ const onMemo = () => {
 }
 // #endregion
 
+const emitMembersEvent = () => {
+  socket.emit("getMembersEvent", {
+    name: userName.value,
+  })
+}
+
+setInterval(() => {
+  emitMembersEvent();
+}, [3000]);
+emitMembersEvent();
+
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
@@ -110,6 +124,11 @@ const registerSocketEvent = () => {
     data.forEach((chat) => {
       chatList.unshift(chat)
     })
+  })
+
+  // メンバー状態を更新
+  socket.on("getMembersEvent", (data) => {
+    memberStatus.value = data;
   })
 }
 // #endregion
@@ -154,6 +173,14 @@ const onPipOut = (event) => {
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+      </div>
+      <div>
+        <ul>
+          <li v-for="[member, state] in memberStatus">
+            {{ member }}：
+            <span v-if="state === 'Active'">在室中</span>
+          </li>
+        </ul>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
