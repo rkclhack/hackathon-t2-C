@@ -44,7 +44,7 @@ const onEnter = () => {
       <h1 class="login-title">Vue.js Chat サンプル</h1>
       <div class="input-group">
         <label for="username">ユーザー名</label>
-        <input type="text" id="username" class="input-field" v-model="inputUserName" />
+        <input type="text" id="username" class="input-field" v-model="inputUserName" @keyup.enter="onEnter" />
       </div>
       <button type="button" @click="onEnter" class="login-button">入室する</button>
     </div>
