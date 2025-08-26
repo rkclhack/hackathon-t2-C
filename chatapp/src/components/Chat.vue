@@ -182,6 +182,8 @@ const onPipOver = (event) => {
 const onPipOut = (event) => {
   mouseoverPip.value = false;
 }
+
+openPip();
 </script>
 
 <template>
