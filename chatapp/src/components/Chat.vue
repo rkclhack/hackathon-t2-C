@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // coputed追加
+import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // computed追加
 import socketManager from '../socketManager.js'
 import { marked } from "marked"
 
@@ -17,6 +17,9 @@ const socket = socketManager.getInstance()
 const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
+
+// ★追加：PiPウィンドウのフォントサイズを管理するリアクティブ変数
+const pipFontSize = ref(16); // 初期値は適宜調整してください
 
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
@@ -183,11 +186,10 @@ const onPipOut = (event) => {
   </div>
   <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
-  <!-- Picture-in-Picture -->
   <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut" v-show="pipStatus">
     <div class="pipFlex">
       <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
-      <div class="mt-5" v-if="chatList.length !== 0">
+      <div class="mt-5" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
         <ul>
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
             :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
@@ -216,6 +218,9 @@ const onPipOut = (event) => {
           <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
         </div>
       </div>
+    </div>
+    <div class="font-slider-container">
+      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
     </div>
   </div>
 </template>
@@ -246,6 +251,7 @@ const onPipOut = (event) => {
 
 .pipWrapper {
   height: 100%;
+  position: relative; /* ★変更③：スライダーを配置する基準にするため、position: relativeを追加 */
 }
 
 .pipFlex {
@@ -258,5 +264,49 @@ const onPipOut = (event) => {
   background-color: lightyellow;
   padding: 8px;
   border-radius: 4px;
+}
+
+/* ★★★★★ 以下、追加したスタイル ★★★★★ */
+/* 既存のスタイルには一切変更を加えていません */
+
+/* スライダーを配置するためのコンテナ */
+.font-slider-container {
+  position: absolute;
+  top: 20px;    /* 上からの位置 */
+  right: 20px;  /* 右からの位置 */
+  z-index: 10;  /* 他の要素より手前に表示 */
+}
+
+/* スライダー本体のスタイル */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: #cccccc;
+  outline: none;
+  border-radius: 3px;
+}
+
+/* スライダーのつまみ（Chrome, Safari, Opera, Edge） */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* スライダーのつまみ（Firefox） */
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
 }
 </style>
