@@ -211,6 +211,10 @@ const onPipOut = (event) => {
         <p>ログインユーザ：{{ userName }}さん</p>
         <textarea variant="outlined" placeholder="投稿文を入力してください" rows="2" class="area" v-model="chatContent"
           @keydown.enter="onPublish"></textarea>
+        <div class="mt-5">
+          <button class="button-normal" @click="onPublish">投稿</button>
+          <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+        </div>
       </div>
     </div>
   </div>
