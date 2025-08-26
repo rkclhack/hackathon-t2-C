@@ -76,18 +76,25 @@ const onMemo = () => {
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
   chatList.unshift(data)
+  onUpdateChatList()
 }
 // #endregion
+
+const onUpdateChatList = () => {
+  // jumpToBottom()
+}
 
 // #region local methods
 // イベント登録をまとめる
@@ -117,6 +124,17 @@ const registerSocketEvent = () => {
 }
 // #endregion
 
+
+const jumpToBottom = () => {
+  console.log("jumpToBottom");
+  // textareaまで移動する
+  const textarea = document.querySelector("#pip-textarea");
+  if (!textarea) return;
+  const target = textarea.getBoundingClientRect().bottom;
+  console.log("jump to " + target);
+  // scrollTo(0, target);
+}
+
 const pipRef = useTemplateRef("pipRef")
 const styles = document.head.cloneNode(true).querySelectorAll("style") // headの全てのstyle要素を取得
 const head_scripts = document.head.cloneNode(true).querySelectorAll("script") // headの全てのscript要素を取得
@@ -136,6 +154,26 @@ const openPip = async () => {
     pipStatus.value = false;
     document.body.append(pipRef.value);
   });
+
+  const messageContainer = pipWindow.document.querySelector(".message-container");
+  console.log(messageContainer);
+  messageContainer.onresize = (event) => {
+    console.log("RESIZED", event);
+  };
+  pipWindow.document.addEventListener("resize", (event) => {
+    console.log("RESIZED", event);
+  });
+
+  let lastChildElementCount = 0;
+  pipWindow.setInterval(() => {
+    const ms = pipWindow.document.querySelector(".message-container");
+    if (!ms) return;
+    const currentChildElementCount = ms.childElementCount;
+    if (currentChildElementCount !== lastChildElementCount) {
+      lastChildElementCount = currentChildElementCount;
+      ms.scroll(0, 99999);
+    }
+  }, 100);
 }
 
 const mouseoverPip = ref(false);
@@ -154,6 +192,9 @@ const onPipOut = (event) => {
     </v-btn>
     <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
     <p>ログインユーザ：{{ userName }}さん</p>
+    <v-btn fixed bottom right color="white" @click="openPip">
+      <v-icon>mdi-open-in-new</v-icon>
+    </v-btn>
   </v-app-bar>
 
 
@@ -188,23 +229,17 @@ const onPipOut = (event) => {
       </v-btn>
 
     </div>
+
+
   </div>
 
-  <v-btn fixed bottom right color="black" dark @click="openPip">
-    <v-icon>mdi-open-in-new</v-icon>
-  </v-btn>
-
-</v-app>
-
-
-<!-- Picture-in-Picture -->
-<div ref="pipRef" class="mx-auto px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut" v-show="pipStatus">
-  <div class="font-slider-container">
-    <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
-  </div>
-  <div class="pipFlex">
-    <div class="mt-5" v-if="chatList.length !== 0">
-      <ul>
+  <!-- Picture-in-Picture -->
+  <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
+    <div class="font-slider-container">
+      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
+    </div>
+    <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
+      <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
         <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
           :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
           <span v-if="chat.type === 'enter'">
@@ -222,17 +257,19 @@ const onPipOut = (event) => {
           </span>
         </li>
       </ul>
-    </div>
-    <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="2" class="area" v-model="chatContent"
-        @keydown.enter="onPublish"></textarea>
-      <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
-        <v-icon right>mdi-send</v-icon>
-      </v-btn>
+      <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
+        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
+          @keydown.enter="onPublish"></textarea>
+        <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
+          <v-icon right>mdi-send</v-icon>
+        </v-btn>
+      </div>
     </div>
   </div>
-</div>
-</template>
+
+
+
+</v-app></template>
 
 <style scoped>
 .link {
@@ -266,13 +303,28 @@ const onPipOut = (event) => {
   background-color: rgb(79, 79, 79);
   color: white;
   height: 100%;
-  position: relative;
+  max-height: 100%;
 }
 
-.pipFlex {
+.pipFlexLayout {
   display: flex;
   flex-direction: column;
+  height: calc(100% - 40px);
+  min-height: 0;
+  /* position: relative; */
+}
+
+.message-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  flex-direction: column;
   justify-content: flex-end;
+  min-height: 0;
+}
+
+.pipInputArea {
+  width: 100vw;
+  position: relative;
 }
 
 .my-message {
@@ -287,16 +339,7 @@ const onPipOut = (event) => {
   color: white
 }
 
-/* スライダーを配置するためのコンテナ */
-.font-slider-container {
-  /* position: absolute;*/
-  /* top: 20px; */
-  /* 上からの位置 */
-  /* right: 20px; */
-  /* 右からの位置 */
-  /* z-index: 10; */
-  /* 他の要素より手前に表示 */
-}
+
 
 /* スライダー本体のスタイル */
 .slider {
@@ -329,5 +372,14 @@ const onPipOut = (event) => {
   border: 2px solid #888888;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.inpArea {
+  width: 70vw;
+  border: 3px solid #007FD4;
+  margin-top: 8px;
+  background-color: #9E9E9E;
+  color: white;
+  border-radius: 5px;
 }
 </style>

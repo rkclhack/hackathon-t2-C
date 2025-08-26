@@ -1,41 +1,41 @@
 <script setup>
- import { inject, ref } from "vue"
- import { useRouter } from "vue-router"
- import socketManager from '../socketManager.js'
+import { inject, ref } from "vue"
+import { useRouter } from "vue-router"
+import socketManager from '../socketManager.js'
 
- // #region global state
- const userName = inject("userName")
- // #endregion
+// #region global state
+const userName = inject("userName")
+// #endregion
 
- // #region local variable
- const router = useRouter()
- const socket = socketManager.getInstance()
- // #endregion
+// #region local variable
+const router = useRouter()
+const socket = socketManager.getInstance()
+// #endregion
 
- // #region reactive variable
- const inputUserName = ref("")
- // #endregion
+// #region reactive variable
+const inputUserName = ref("")
+// #endregion
 
- // #region browser event handler
- // 入室メッセージをクライアントに送信する
- const onEnter = () => {
-   // ユーザー名が入力されているかチェック
-   if (inputUserName.value === "") {
-     alert("ユーザー名を入力してください")
-     return
-   }
-   // 入室メッセージを送信
-   socket.emit("enterEvent", {
-     type: "enter",
-     name: inputUserName.value,
-     datetime: Date.now()
-   })
-   // 全体で使用するnameに入力されたユーザー名を格納
-   userName.value = inputUserName.value
-   // チャット画面へ遷移
-   router.push({ name: "chat" })
- }
- // #endregion
+// #region browser event handler
+// 入室メッセージをクライアントに送信する
+const onEnter = () => {
+  // ユーザー名が入力されているかチェック
+  if (inputUserName.value === "") {
+    alert("ユーザー名を入力してください")
+    return
+  }
+  // 入室メッセージを送信
+  socket.emit("enterEvent", {
+    type: "enter",
+    name: inputUserName.value,
+    datetime: Date.now()
+  })
+  // 全体で使用するnameに入力されたユーザー名を格納
+  userName.value = inputUserName.value
+  // チャット画面へ遷移
+  router.push({ name: "chat" })
+}
+// #endregion
 </script>
 
 <template>
@@ -44,7 +44,7 @@
       <h1 class="login-title">Vue.js Chat サンプル</h1>
       <div class="input-group">
         <label for="username">ユーザー名</label>
-        <input type="text" id="username" class="input-field" v-model="inputUserName" />
+        <input type="text" id="username" class="input-field" v-model="inputUserName" @keyup.enter="onEnter" />
       </div>
       <button type="button" @click="onEnter" class="login-button">入室する</button>
     </div>
@@ -62,7 +62,7 @@
 }
 
 .login-form {
-  background-color:  #24292e;
+  background-color: #24292e;
   padding: 32px;
   border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
