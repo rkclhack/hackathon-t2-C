@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // coputed追加
+import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // computed追加
 import socketManager from '../socketManager.js'
 import { marked } from "marked"
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
@@ -18,6 +18,8 @@ const socket = socketManager.getInstance()
 const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
+
+const pipFontSize = ref(16);
 
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
@@ -196,7 +198,10 @@ const onPipOut = (event) => {
 
 
 <!-- Picture-in-Picture -->
-<div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut" v-show="pipStatus">
+<div ref="pipRef" class="mx-auto px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut" v-show="pipStatus">
+  <div class="font-slider-container">
+    <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
+  </div>
   <div class="pipFlex">
     <div class="mt-5" v-if="chatList.length !== 0">
       <ul>
@@ -259,7 +264,9 @@ const onPipOut = (event) => {
 .pipWrapper {
   /*height: 100%;  */
   background-color: rgb(79, 79, 79);
-  color: white
+  color: white;
+  height: 100%;
+  position: relative;
 }
 
 .pipFlex {
@@ -278,5 +285,49 @@ const onPipOut = (event) => {
 .app {
   background-color: rgb(79, 79, 79);
   color: white
+}
+
+/* スライダーを配置するためのコンテナ */
+.font-slider-container {
+  /* position: absolute;*/
+  /* top: 20px; */
+  /* 上からの位置 */
+  /* right: 20px; */
+  /* 右からの位置 */
+  /* z-index: 10; */
+  /* 他の要素より手前に表示 */
+}
+
+/* スライダー本体のスタイル */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: #cccccc;
+  outline: none;
+  border-radius: 3px;
+}
+
+/* スライダーのつまみ（Chrome, Safari, Opera, Edge） */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* スライダーのつまみ（Firefox） */
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
 }
 </style>
