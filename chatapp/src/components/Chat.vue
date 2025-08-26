@@ -121,9 +121,7 @@ const body_scripts = document.body.cloneNode(true).querySelectorAll("script") //
 // Picture-in-Picture 状態
 const pipStatus = ref(false)
 const openPip = async () => {
-  const pipWindow = await window.documentPictureInPicture.requestWindow({
-    copyStyleSheets: true,
-  });
+  const pipWindow = await window.documentPictureInPicture.requestWindow({});
   pipWindow.document.body.append(pipRef.value);
   pipWindow.document.head.append(...styles); // 全てのstyle要素をPiPに張り付け
   pipWindow.document.head.append(...head_scripts); // headの全てのscript要素をPiPに張り付け
@@ -186,7 +184,7 @@ const onPipOut = (event) => {
   <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
   <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut">
+  <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper" @mouseover="onPipOver" @mouseout="onPipOut" v-show="pipStatus">
     <div class="pipFlex">
       <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
       <div class="mt-5" v-if="chatList.length !== 0">
