@@ -38,10 +38,10 @@ const onPublish = (event) => {
       content: chatContent.value,
       datetime: Date.now()
     })
-
+  }
     // 入力欄を初期化
     chatContent.value = ""
-  }
+  
 }
 
 // 退室メッセージをサーバに送信する
