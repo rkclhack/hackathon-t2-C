@@ -62,6 +62,15 @@ const onExit = () => {
   })
 }
 
+// 休憩メッセージをサーバに送信する
+const onIdle = () => {
+  socket.emit("idleEvent", {
+    type: "idle",
+    name: userName.value,
+    datetime: Date.now()
+  })
+}
+
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
@@ -98,6 +107,10 @@ const onReceiveExit = (data) => {
 const onReceivePublish = (data) => {
   chatList.unshift(data)
 }
+
+const onReceiveIdle = (data) => {
+  chatList.unshift(data)
+}
 // #endregion
 
 // #region local methods
@@ -111,6 +124,11 @@ const registerSocketEvent = () => {
   // 退室イベントを受け取ったら実行
   socket.on("exitEvent", (data) => {
     onReceiveExit(data);
+  })
+
+  // 休憩イベントを受け取ったら実行
+  socket.on("idleEvent", (data) => {
+    onReceiveIdle(data);
   })
 
   // 投稿イベントを受け取ったら実行
@@ -173,12 +191,14 @@ const onPipOut = (event) => {
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
+        <button class="button-normal util-ml-8px" @click="onIdle">休憩に入る</button>
       </div>
       <div>
         <ul>
           <li v-for="[member, state] in memberStatus">
             {{ member }}：
             <span v-if="state === 'Active'">在室中</span>
+            <span v-if="state === 'Idle'">休憩中</span>
           </li>
         </ul>
       </div>
@@ -192,6 +212,9 @@ const onPipOut = (event) => {
             </span>
             <span v-if="chat.type === 'exit'">
               {{ chat.name }}が退室しました。
+            </span>
+            <span v-if="chat.type === 'idle'">
+              {{ chat.name }}が休憩に入りました。
             </span>
             <span v-if="chat.type === 'publish'">
               {{ chat.name }}：
@@ -223,6 +246,9 @@ const onPipOut = (event) => {
             </span>
             <span v-if="chat.type === 'exit'">
               {{ chat.name }}が退室しました。
+            </span>
+            <span v-if="chat.type === 'idle'">
+              {{ chat.name }}が休憩に入りました。
             </span>
             <span v-if="chat.type === 'publish'">
               {{ chat.name }}：

@@ -12,11 +12,12 @@ const enterRoom = (name) => {
   memberStatus[name] = "Active";
 }
 
-// 部屋に入る
+// 退出する
 const exitRoom = (name) => {
   memberStatus[name] = "Inactive";
 }
 
+// 休憩中にする
 const idleMemeber = (name) => {
   memberStatus[name] = "Idle";
 }
@@ -41,6 +42,14 @@ export default (io, socket) => {
 
     history.push(data) // 履歴に追加
     socket.broadcast.emit("exitEvent", data)
+  })
+
+  // 休憩メッセージをクライアントに送信する
+  socket.on("idleEvent", (data) => {
+    idleMemeber(data.name);
+
+    history.push(data) // 履歴に追加
+    socket.broadcast.emit("idleEvent", data)
   })
 
   // 投稿メッセージを送信する
