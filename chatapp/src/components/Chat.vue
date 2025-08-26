@@ -4,8 +4,6 @@ import socketManager from '../socketManager.js'
 
 // #region global state
 const userName = inject("userName")
-{{ console.log(`上のユーザーネーム:`, { userName: userName.value }) }}
-
 // #endregion
 
 // #region local variable
@@ -115,7 +113,6 @@ const openPip = async () => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      {{ console.log(`下のユーザーネーム:`, { userName: userName.value }) }}
       <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
@@ -123,12 +120,10 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li
-            class="item mt-4"
-            :class="{ 'my-message': userName.value && chat.name === userName.value }"
-            v-for="(chat, i) in chatList"
-            :key="i"
-          >
+          <li class="item mt-4"
+              v-for="(chat, i) in chatList"
+              :key="i"
+              :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
@@ -143,7 +138,7 @@ const openPip = async () => {
               {{ chat.name }}のメモ：{{ chat.content }}
             </span>
           </li>
-        </ul>
+          </ul>
       </div>
     </div>
     <router-link to="/" class="link">
@@ -152,12 +147,10 @@ const openPip = async () => {
   </div>
   <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
-  <!-- Picture-in-Picture -->
   <div ref="pipRef" class="mx-auto my-5 px-4">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      {{ console.log(`yu-za-ne-mu:`, { userName: userName.value }) }}
       <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
@@ -165,13 +158,10 @@ const openPip = async () => {
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li
-            class="item mt-4"
-            :class="{ 'my-message': userName.value && chat.name === userName.value }"
-            v-for="(chat, i) in chatList"
-            :key="i"
-          >
-            {{ console.log(`[${i}]比較:`, { chatName: chat.name, userName: userName.value }) }}
+          <li class="item mt-4"
+              v-for="(chat, i) in chatList"
+              :key="i"
+              :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
             </span>
@@ -185,22 +175,12 @@ const openPip = async () => {
               {{ chat.name }}のメモ：{{ chat.content }}
             </span>
           </li>
-        </ul>
+          </ul>
       </div>
     </div>
     <router-link to="/" class="link">
       <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
     </router-link>
-  </div>
-
-  <div class="chat-container">
-    <div
-      v-for="msg in messages"
-      :key="msg.id"
-      :class="['chat-message', { 'my-message': msg.userId === currentUserId }]"
-    >
-      <span>{{ msg.text }}</span>
-    </div>
   </div>
 </template>
 
@@ -228,12 +208,12 @@ const openPip = async () => {
   margin-top: 8px;
 }
 
-.chat-message {
-  padding: 8px;
-  margin-bottom: 4px;
-  border-radius: 4px;
-}
+/* ▼▼▼ 変更点3 ▼▼▼ */
+/* 自分自身の投稿とメモに適用するスタイルを追加 */
 .my-message {
-  background-color: #fff9c4; /* 薄い黄色 */
+  background-color: lightyellow; /* 背景を薄い黄色に */
+  padding: 8px;                  /* 見栄えのため少し余白を追加 */
+  border-radius: 4px;            /* 角を少し丸くする */
 }
+/* ▲▲▲ 変更点3 ▲▲▲ */
 </style>
