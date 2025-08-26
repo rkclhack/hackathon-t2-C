@@ -274,7 +274,7 @@ const onPipOut = (event) => {
 </template>
 
 <style scoped>
-/* ========== 全体的なスタイル ========== */
+/* 全体的なスタイル */
 .app {
   background-color: #1E1E1E;
   color: #E0E0E0;
@@ -285,7 +285,7 @@ ul {
   padding: 0;
 }
 
-/* ========== チャットメッセージ ========== */
+/* チャットメッセージ */
 .message-item {
   display: flex;
   flex-direction: column;
@@ -332,7 +332,6 @@ ul {
 
 .my-message .user-info {
   flex-direction: row-reverse;
-  /* 名前とタイムスタンプの順序を反転 */
 }
 
 .my-message .message-bubble {
@@ -340,7 +339,7 @@ ul {
   border-top-right-radius: 4px;
 }
 
-/* ========== 入退室ログ ========== */
+/* 入退室ログ*/
 .log-message {
   text-align: center;
   margin: 8px 0;
@@ -352,17 +351,17 @@ ul {
   font-size: 0.75rem;
 }
 
-/* ========== PiP用スタイル調整 ========== */
+/* PiP用スタイル調整 */
 .pipWrapper .log-message,
 .pipWrapper .message-item {
-  margin-bottom: 8px; /* PiPでは少し詰める */
+  margin-bottom: 4px; /* PiPでは少し詰める */
 }
 .pipWrapper .log-message {
   font-size: 0.9em;
 }
 
 
-/* ========== 以下、既存のスタイル ========== */
+/* 以下、既存のスタイル */
 .link {
   text-decoration: none;
 }
@@ -371,7 +370,6 @@ ul {
   width: 500px;
   border: 0;
   background-color: #3a3a3a;
-  /* 背景に合わせて変更 */
   color: #E0E0E0;
   border-radius: 5px;
   padding: 8px;
@@ -492,7 +490,7 @@ ul {
 </style>
 
 <style>
-/* Markdownコンテンツのスタイル（グローバル） */
+/* Markdownコンテンツのスタイル */
 .markdown-body {
   line-height: 1.6;
   color: #E0E0E0;
