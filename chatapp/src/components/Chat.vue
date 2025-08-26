@@ -35,7 +35,7 @@ const onPublish = (event) => {
   const message = chatContent.value.trim()
 
   // Ctrl + Enter で送信
-  if (event instanceof KeyboardEvent && !event.ctrlKey) return;
+  if (event.key === 'Enter' && !event.ctrlKey) return;
 
   // メッセージが空文字でなければ、サーバーに送信する
   if (message) {
