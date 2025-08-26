@@ -116,6 +116,11 @@
     });
     pipWindow.document.body.append(pipRef.value);
     pipStatus.value = true;
+    // Picture-in-Picture 終了時のイベント登録
+    pipWindow.addEventListener('pagehide', (event) => {
+      pipStatus.value = false;
+      document.body.append(pipRef.value);
+    });
   }
 </script>
 
