@@ -3,6 +3,9 @@ import { inject, ref, reactive, onMounted, useTemplateRef, computed} from "vue" 
 import socketManager from '../socketManager.js'
 import { marked } from "marked"
 
+// markedの改行オプションをtrueに設定
+marked.setOptions({breaks : true});
+
 // #region global state
 const userName = inject("userName")
 // #endregion
