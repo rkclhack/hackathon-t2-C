@@ -201,26 +201,28 @@ const onPipOut = (event) => {
     <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
       <div class="mt-10">
         <div class="mt-5" v-if="chatList.length !== 0">
-          <ul>
-            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-              :class="{
-                'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName,
-                'other-message': chat.type === 'publish' && chat.name !== userName
-              }">
-              <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
-              <span v-if="chat.type === 'enter'">
-                {{ chat.name }}が入室しました。
-              </span>
-              <span v-if="chat.type === 'exit'">
-                {{ chat.name }}が退室しました。
-              </span>
-              <div v-if="chat.type === 'publish'">
-                {{ chat.name }}：
-                <div class="markdown-body" v-html="chat.content"></div>
+          <ul class="chat-list">
+            <li class="chat-item my-4" v-for="(chat, i) in chatList" :key="i">
+
+              <div v-if="chat.type === 'enter' || chat.type === 'exit'" class="system-message">
+                <span>{{ chat.name }}が{{ chat.type === 'enter' ? '入室' : '退室' }}しました。</span>
+                <span class="timestamp ml-2">{{ new Date(chat.datetime).toLocaleString() }}</span>
               </div>
-              <span v-if="chat.type === 'memo'">
-                {{ chat.name }}のメモ：{{ chat.content }}
-              </span>
+
+              <div v-else class="message-wrapper" :class="{
+                'my-message': chat.name === userName,
+                'other-message': chat.name !== userName
+              }">
+                <div class="sender-info">
+                  <span class="sender-name">{{ chat.name }}</span>
+                  <span class="timestamp">{{ new Date(chat.datetime).toLocaleString() }}</span>
+                </div>
+                <div class="message-bubble">
+                  <div v-if="chat.type === 'publish'" class="markdown-body" v-html="chat.content"></div>
+                  <div v-if="chat.type === 'memo'">{{ chat.content }}</div>
+                </div>
+              </div>
+
             </li>
           </ul>
         </div>
@@ -239,11 +241,10 @@ const onPipOut = (event) => {
       </div>
       <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
         <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-            :class="{
-              'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName,
-              'other-message': chat.type === 'publish' && chat.name !== userName
-            }">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i" :class="{
+            'my-message-pip': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName,
+            'other-message-pip': chat.type === 'publish' && chat.name !== userName
+          }">
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
             </span>
@@ -272,6 +273,70 @@ const onPipOut = (event) => {
 </template>
 
 <style scoped>
+/* 基本設定 */
+.app {
+  background-color: #1E1E1E;
+  color: #E0E0E0;
+}
+
+.chat-list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.timestamp {
+  color: #94A3B8;
+  font-size: 0.8em;
+}
+
+/* 入退室ログ (中央揃え) */
+.system-message {
+  text-align: center;
+  color: #94A3B8;
+}
+
+/* 投稿メッセージの共通ラッパー */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.sender-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* メッセージのフキダシ */
+.message-bubble {
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+/* 他人のメッセージ (左寄せ) */
+.other-message {
+  align-items: flex-start;
+}
+.other-message .message-bubble {
+  background-color: #30363d;
+  border-bottom-left-radius: 5px; /* フキダシらしさを出す */
+}
+
+/* 自分のメッセージ (右寄せ) */
+.my-message {
+  align-items: flex-end;
+}
+.my-message .message-bubble {
+  background-color: #007ACC;
+  border-bottom-right-radius: 5px; /* フキダシらしさを出す */
+}
+
+
+/* --- 以下、変更なし --- */
+
 .link {
   text-decoration: none;
 }
@@ -285,10 +350,6 @@ const onPipOut = (event) => {
   border-radius: 5px;
 }
 
-.item {
-  display: block;
-}
-
 .util-ml-8px {
   margin-left: 8px;
 }
@@ -299,8 +360,7 @@ const onPipOut = (event) => {
 }
 
 .pipWrapper {
-  /*height: 100%;  */
-  background-color: #1E1E1E;;
+  background-color: rgb(79, 79, 79);
   color: white;
   height: 100%;
   max-height: 100%;
@@ -311,7 +371,6 @@ const onPipOut = (event) => {
   flex-direction: column;
   height: calc(100% - 40px);
   min-height: 0;
-  /* position: relative; */
 }
 
 .message-container {
@@ -327,33 +386,18 @@ const onPipOut = (event) => {
   position: relative;
 }
 
-.my-message {
-  background-color: #7DD3FC;
-  color: #212529;
+/* PiP用のスタイル */
+.my-message-pip {
+  background-color: #38bdf8;
+  color: black;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 4px;
 }
-
-.other-message {
-  background-color: #E9ECEF;
-  color: #212529;
+.other-message-pip {
+  background-color: #E0E0E0;
+  color: black;
   padding: 8px;
-  border-radius: 8px;
-}
-
-/* タイムスタンプやシステムメッセージの色を少し抑える */
-.item > span:first-child,
-.item > span[v-if*="enter"],
-.item > span[v-if*="exit"] {
-  color: #94A3B8;
-  font-size: 0.875rem;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.app {
-  background-color: #1E1E1E;
-  color: white;
+  border-radius: 4px;
 }
 
 /* スライダー本体のスタイル */
@@ -403,13 +447,14 @@ const onPipOut = (event) => {
 /* Markdownコンテンツのコンテナ */
 .markdown-body {
   line-height: 1.6;
-  padding-left: 8px;
-  /* コンテナ全体に左パディングを追加 */
 }
 
-/* 段落 */
+/* 段落のデフォルトマージンをリセット */
 .markdown-body p {
-  margin: 0.5em 0;
+  margin: 0;
+}
+.markdown-body p:not(:last-child) {
+  margin-bottom: 0.5em;
 }
 
 /* 見出し */
@@ -426,10 +471,8 @@ const onPipOut = (event) => {
 /* リスト */
 .markdown-body ul,
 .markdown-body ol {
-  padding-left: 8px;
-  /*margin: 0.5em 0;*/
-  /*list-style-position: inside;*/
-  /* 行頭記号を要素のボックス内に配置 */
+  padding-left: 20px;
+  margin: 0.5em 0;
 }
 
 .markdown-body li {
@@ -438,24 +481,27 @@ const onPipOut = (event) => {
 
 /* 引用ブロック */
 .markdown-body blockquote {
-  border-left: 3px solid #ccc;
+  border-left: 3px solid #58a6ff; /* テーマに合わせた色 */
   padding-left: 1em;
-  color: #666;
+  color: #94A3B8; /* タイムスタンプに合わせた色 */
   margin: 0.5em 0;
 }
 
 /* コードブロック */
 .markdown-body pre {
-  background-color: #f5f5f5;
-  padding: 0.5em;
+  background-color: #2D333B; /* コンセプトに合わせた暗い背景 */
+  color: #E0E0E0;
+  padding: 1em;
   overflow-x: auto;
+  border-radius: 6px;
 }
 
 /* インラインコード */
 .markdown-body code {
-  background-color: #f0f0f0;
-  padding: 0.1em 0.3em;
-  border-radius: 3px;
+  background-color: #2D333B; /* コードブロックと背景色を統一 */
+  color: #E0E0E0;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
 }
 
 /* テーブル */
@@ -466,7 +512,7 @@ const onPipOut = (event) => {
 
 .markdown-body th,
 .markdown-body td {
-  border: 1px solid #ccc;
+  border: 1px solid #444c56; /* ボーダー色を調整 */
   padding: 0.3em 0.5em;
 }
 </style>
