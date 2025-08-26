@@ -148,7 +148,7 @@ const onPipOut = (event) => {
   <div class="mx-auto my-5 px-4">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
-      <p>ログインユーザ：{{ userName }}さん</p>
+      <p>ログインユーザ：{{ userName }}</p>
       <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
         @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
