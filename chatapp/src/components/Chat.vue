@@ -1,6 +1,7 @@
 <script setup>
-  import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
+  import { inject, ref, reactive, onMounted, useTemplateRef, computed} from "vue" // coputed追加
   import socketManager from '../socketManager.js'
+  import { marked } from "marked"
 
   // #region global state
   const userName = inject("userName")
@@ -14,6 +15,10 @@
   const chatContent = ref("")
   const chatList = reactive([])
   // #endregion
+
+  const markdown = computed(() => {
+    return marked.parse(chatContent.value)
+  });
 
   // #region lifecycle
   onMounted(() => {
@@ -49,6 +54,7 @@
     socket.emit("exitEvent", {
       type: "exit",
       name: userName.value,
+      content: markdown.value, // chatContentからmarkdownに変更
       datetime: Date.now()
     })
   }
@@ -138,7 +144,8 @@
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
