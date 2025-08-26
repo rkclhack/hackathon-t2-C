@@ -181,7 +181,8 @@
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
