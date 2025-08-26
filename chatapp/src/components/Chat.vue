@@ -3,9 +3,6 @@
   import socketManager from '../socketManager.js'
   import { marked } from "marked"
 
-// markedの改行オプションをtrueに設定
-marked.setOptions({breaks : true});
-
   // markedの改行オプションをtrueに設定
   marked.setOptions({breaks : true});
 
@@ -51,7 +48,6 @@ marked.setOptions({breaks : true});
     }
     // 入力欄を初期化
     chatContent.value = ""
-
   }
 
   // 退室メッセージをサーバに送信する
