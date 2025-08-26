@@ -115,10 +115,18 @@
   // #endregion
 
   const pipRef = useTemplateRef("pipRef")
+  // Picture-in-Picture 状態
+  const pipStatus = ref(false)
   const openPip = async () => {
     const pipWindow = await window.documentPictureInPicture.requestWindow({
     });
     pipWindow.document.body.append(pipRef.value);
+    pipStatus.value = true;
+    // Picture-in-Picture 終了時のイベント登録
+    pipWindow.addEventListener('pagehide', (event) => {
+      pipStatus.value = false;
+      document.body.append(pipRef.value);
+    });
   }
 </script>
 
@@ -161,7 +169,7 @@
   <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
 
   <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto my-5 px-4">
+  <div ref="pipRef" class="mx-auto my-5 px-4" v-show="pipStatus">
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
