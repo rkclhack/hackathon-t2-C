@@ -4,8 +4,9 @@ const history = []
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
-    history.push(data) // 履歴に追加
     socket.broadcast.emit("enterEvent", data)
+    history.push(data) // 履歴に追加
+    socket.emit("historyEvent", history)  // 履歴を送信
   })
 
   // 退室メッセージをクライアントに送信する

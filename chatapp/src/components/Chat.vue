@@ -1,10 +1,13 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef } from "vue"
+import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // coputed追加
 import socketManager from '../socketManager.js'
+import { marked } from "marked"
+
+// markedの改行オプションをtrueに設定
+marked.setOptions({ breaks: true });
 
 // #region global state
 const userName = inject("userName")
-// #endregion
 
 // #region local variable
 const socket = socketManager.getInstance()
@@ -14,6 +17,10 @@ const socket = socketManager.getInstance()
 const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
+
+const markdown = computed(() => {
+  return marked.parse(chatContent.value)
+});
 
 // #region lifecycle
 onMounted(() => {
@@ -35,13 +42,12 @@ const onPublish = (event) => {
     socket.emit("publishEvent", {
       type: "publish",
       name: userName.value,
-      content: chatContent.value,
+      content: markdown.value,
       datetime: Date.now()
     })
   }
-    // 入力欄を初期化
-    chatContent.value = ""
-  
+  // 入力欄を初期化
+  chatContent.value = ""
 }
 
 // 退室メッセージをサーバに送信する
@@ -97,6 +103,14 @@ const registerSocketEvent = () => {
   socket.on("publishEvent", (data) => {
     onReceivePublish(data);
   })
+
+  // 履歴イベントを受け取ったら実行
+  socket.on("historyEvent", (data) => {
+    // 履歴を画面上に表示
+    data.forEach((chat) => {
+      chatList.unshift(chat)
+    })
+  })
 }
 // #endregion
 
@@ -104,6 +118,8 @@ const pipRef = useTemplateRef("pipRef")
 const styles = document.head.cloneNode(true).querySelectorAll("style") // headの全てのstyle要素を取得
 const head_scripts = document.head.cloneNode(true).querySelectorAll("script") // headの全てのscript要素を取得
 const body_scripts = document.body.cloneNode(true).querySelectorAll("script") // bodyの全てのscript要素を取得
+// Picture-in-Picture 状態
+const pipStatus = ref(false)
 const openPip = async () => {
   const pipWindow = await window.documentPictureInPicture.requestWindow({
     copyStyleSheets: true,
@@ -112,6 +128,13 @@ const openPip = async () => {
   pipWindow.document.head.append(...styles); // 全てのstyle要素をPiPに張り付け
   pipWindow.document.head.append(...head_scripts); // headの全てのscript要素をPiPに張り付け
   pipWindow.document.body.append(...body_scripts); // bodyの全てのscript要素をPiPに張り付け
+
+  pipStatus.value = true;
+  // Picture-in-Picture 終了時のイベント登録
+  pipWindow.addEventListener('pagehide', (event) => {
+    pipStatus.value = false;
+    document.body.append(pipRef.value);
+  });
 }
 
 const mouseoverPip = ref(false);
@@ -128,14 +151,16 @@ const onPipOut = (event) => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <div class="mt-10">
       <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
         <button class="button-normal" @click="onPublish">投稿</button>
         <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
       </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
@@ -144,7 +169,8 @@ const onPipOut = (event) => {
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
@@ -165,7 +191,8 @@ const onPipOut = (event) => {
       <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
             <span v-if="chat.type === 'enter'">
               {{ chat.name }}が入室しました。
             </span>
@@ -173,7 +200,8 @@ const onPipOut = (event) => {
               {{ chat.name }}が退室しました。
             </span>
             <span v-if="chat.type === 'publish'">
-              {{ chat.name }}：{{ chat.content }}
+              {{ chat.name }}：
+              <span v-html="chat.content"></span>
             </span>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
@@ -183,7 +211,8 @@ const onPipOut = (event) => {
       </div>
       <div class="pipInputArea" v-show="mouseoverPip">
         <p>ログインユーザ：{{ userName }}さん</p>
-        <textarea variant="outlined" placeholder="投稿文を入力してください" rows="2" class="area" v-model="chatContent" @keydown.enter="onPublish"></textarea>
+        <textarea variant="outlined" placeholder="投稿文を入力してください" rows="2" class="area" v-model="chatContent"
+          @keydown.enter="onPublish"></textarea>
       </div>
     </div>
   </div>
@@ -216,9 +245,16 @@ const onPipOut = (event) => {
 .pipWrapper {
   height: 100%;
 }
+
 .pipFlex {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+}
+
+.my-message {
+  background-color: lightyellow;
+  padding: 8px;
+  border-radius: 4px;
 }
 </style>

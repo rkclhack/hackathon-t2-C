@@ -14,5 +14,4 @@ provide("userName", userName)
   <router-view />
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
