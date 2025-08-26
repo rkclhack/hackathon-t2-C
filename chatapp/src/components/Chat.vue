@@ -2,6 +2,7 @@
 import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // computed追加
 import socketManager from '../socketManager.js'
 import { marked } from "marked"
+import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 
 // markedの改行オプションをtrueに設定
 marked.setOptions({ breaks: true });
@@ -184,18 +185,21 @@ const onPipOut = (event) => {
 }
 </script>
 
-<template>
-  <div class="mx-auto my-5 px-4">
-    <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
-    <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
+<template><v-app class="app">
+  <v-app-bar app color="black" dark>
+    <v-btn icon @click="onExit" to="/">
+      <v-icon>mdi-logout</v-icon>
+    </v-btn>
+    <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
+    <p>ログインユーザ：{{ userName }}さん</p>
+    <v-btn fixed bottom right color="white" @click="openPip">
+      <v-icon>mdi-open-in-new</v-icon>
+    </v-btn>
+  </v-app-bar>
+
+
+  <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
     <div class="mt-10">
-      <p>ログインユーザ：{{ userName }}</p>
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
-        @keydown.enter="onPublish"></textarea>
-      <div class="mt-5">
-        <button class="button-normal" @click="onPublish">投稿</button>
-        <button class="button-normal util-ml-8px" @click="onMemo">メモ</button>
-      </div>
       <div class="mt-5" v-if="chatList.length !== 0">
         <ul>
           <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
@@ -217,16 +221,24 @@ const onPipOut = (event) => {
           </li>
         </ul>
       </div>
+
+      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
+        @keydown.enter="onPublish"></textarea>
+      <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
+        <v-icon right>mdi-send</v-icon>
+      </v-btn>
+
     </div>
-    <router-link to="/" class="link">
-      <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
-    </router-link>
+
+
   </div>
 
   <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper">
+  <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
+    <div class="font-slider-container">
+      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
+    </div>
     <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
-      <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
       <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
         <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
           :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
@@ -245,16 +257,19 @@ const onPipOut = (event) => {
           </span>
         </li>
       </ul>
-      <div class="pipInputArea" v-show="mouseoverPip">
-        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="area" v-model="chatContent"
+      <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
+        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
           @keydown.enter="onPublish"></textarea>
+        <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
+          <v-icon right>mdi-send</v-icon>
+        </v-btn>
       </div>
     </div>
-    <div class="font-slider-container">
-      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
-    </div>
   </div>
-</template>
+
+
+
+</v-app></template>
 
 <style scoped>
 .link {
@@ -263,8 +278,11 @@ const onPipOut = (event) => {
 
 .area {
   width: 500px;
-  border: 1px solid #000;
+  border: 3px solid #007FD4;
   margin-top: 8px;
+  background-color: #9E9E9E;
+  color: white;
+  border-radius: 5px;
 }
 
 .item {
@@ -281,6 +299,9 @@ const onPipOut = (event) => {
 }
 
 .pipWrapper {
+  /*height: 100%;  */
+  background-color: rgb(79, 79, 79);
+  color: white;
   height: 100%;
   max-height: 100%;
 }
@@ -302,26 +323,23 @@ const onPipOut = (event) => {
 }
 
 .pipInputArea {
-  width: 100%;
+  width: 100vw;
   position: relative;
 }
 
 .my-message {
   background-color: lightyellow;
+  color: black;
   padding: 8px;
   border-radius: 4px;
 }
 
-/* スライダーを配置するためのコンテナ */
-.font-slider-container {
-  position: absolute;
-  top: 20px;
-  /* 上からの位置 */
-  right: 20px;
-  /* 右からの位置 */
-  z-index: 10;
-  /* 他の要素より手前に表示 */
+.app {
+  background-color: rgb(79, 79, 79);
+  color: white
 }
+
+
 
 /* スライダー本体のスタイル */
 .slider {
@@ -354,5 +372,14 @@ const onPipOut = (event) => {
   border: 2px solid #888888;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.inpArea {
+  width: 70vw;
+  border: 3px solid #007FD4;
+  margin-top: 8px;
+  background-color: #9E9E9E;
+  color: white;
+  border-radius: 5px;
 }
 </style>
