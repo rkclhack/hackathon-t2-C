@@ -185,85 +185,91 @@ const onPipOut = (event) => {
 }
 </script>
 
-<template><v-app class="app">
-  <v-app-bar app color="black" dark>
-    <v-btn icon @click="onExit" to="/">
-      <v-icon>mdi-logout</v-icon>
-    </v-btn>
-    <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
-    <p>ログインユーザ：{{ userName }}さん</p>
-    <v-btn fixed bottom right color="white" @click="openPip">
-      <v-icon>mdi-open-in-new</v-icon>
-    </v-btn>
-  </v-app-bar>
-
-
-  <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
-    <div class="mt-10">
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-            :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
-            <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
-            <span v-if="chat.type === 'enter'">
-              {{ chat.name }}が入室しました。
-            </span>
-            <span v-if="chat.type === 'exit'">
-              {{ chat.name }}が退室しました。
-            </span>
-            <div v-if="chat.type === 'publish'">
-              {{ chat.name }}：
-              <div class="markdown-body" v-html="chat.content"></div>
-            </div>
-            <span v-if="chat.type === 'memo'">
-              {{ chat.name }}のメモ：{{ chat.content }}
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
-        @keydown.enter="onPublish"></textarea>
-      <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
-        <v-icon right>mdi-send</v-icon>
+<template>
+  <v-app class="app">
+    <v-app-bar app color="#24292e" dark>
+      <v-btn icon @click="onExit" to="/">
+        <v-icon>mdi-logout</v-icon>
       </v-btn>
-    </div>
-  </div>
+      <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
+      <p>ログインユーザ：{{ userName }}さん</p>
+      <v-btn fixed bottom right color="white" @click="openPip">
+        <v-icon>mdi-open-in-new</v-icon>
+      </v-btn>
+    </v-app-bar>
 
-  <!-- Picture-in-Picture -->
-  <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
-    <div class="font-slider-container">
-      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
-    </div>
-    <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
-      <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
-        <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
-          :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
-          <span v-if="chat.type === 'enter'">
-            {{ chat.name }}が入室しました。
-          </span>
-          <span v-if="chat.type === 'exit'">
-            {{ chat.name }}が退室しました。
-          </span>
-          <span v-if="chat.type === 'publish'">
-            {{ chat.name }}：
-            <div class="markdown-body" v-html="chat.content"></div>
-          </span>
-          <span v-if="chat.type === 'memo'">
-            {{ chat.name }}のメモ：{{ chat.content }}
-          </span>
-        </li>
-      </ul>
-      <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
-        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
+    <div class="mx-auto my-5 px-4 chat" style="padding-top: 10px; padding-bottom: 10px;">
+      <div class="mt-10">
+        <div class="mt-5" v-if="chatList.length !== 0">
+          <ul>
+            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+              :class="{
+                'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName,
+                'other-message': chat.type === 'publish' && chat.name !== userName
+              }">
+              <span>[{{ new Date(chat.datetime).toLocaleString() }}]</span>
+              <span v-if="chat.type === 'enter'">
+                {{ chat.name }}が入室しました。
+              </span>
+              <span v-if="chat.type === 'exit'">
+                {{ chat.name }}が退室しました。
+              </span>
+              <div v-if="chat.type === 'publish'">
+                {{ chat.name }}：
+                <div class="markdown-body" v-html="chat.content"></div>
+              </div>
+              <span v-if="chat.type === 'memo'">
+                {{ chat.name }}のメモ：{{ chat.content }}
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
           @keydown.enter="onPublish"></textarea>
         <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
           <v-icon right>mdi-send</v-icon>
         </v-btn>
       </div>
     </div>
-  </div>
-</v-app></template>
+
+    <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
+      <div class="font-slider-container">
+        <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
+      </div>
+      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
+        <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
+          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
+            :class="{
+              'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName,
+              'other-message': chat.type === 'publish' && chat.name !== userName
+            }">
+            <span v-if="chat.type === 'enter'">
+              {{ chat.name }}が入室しました。
+            </span>
+            <span v-if="chat.type === 'exit'">
+              {{ chat.name }}が退室しました。
+            </span>
+            <span v-if="chat.type === 'publish'">
+              {{ chat.name }}：
+              <div class="markdown-body" v-html="chat.content"></div>
+            </span>
+            <span v-if="chat.type === 'memo'">
+              {{ chat.name }}のメモ：{{ chat.content }}
+            </span>
+          </li>
+        </ul>
+        <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
+          <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea"
+            v-model="chatContent" @keydown.enter="onPublish"></textarea>
+          <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
+            <v-icon right>mdi-send</v-icon>
+          </v-btn>
+        </div>
+      </div>
+    </div>
+  </v-app>
+</template>
 
 <style scoped>
 .link {
@@ -294,7 +300,7 @@ const onPipOut = (event) => {
 
 .pipWrapper {
   /*height: 100%;  */
-  background-color: rgb(79, 79, 79);
+  background-color: #1E1E1E;;
   color: white;
   height: 100%;
   max-height: 100%;
@@ -322,62 +328,32 @@ const onPipOut = (event) => {
 }
 
 .my-message {
-  background-color: lightyellow;
-  color: black;
+  background-color: #7DD3FC;
+  color: #212529;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 8px;
+}
+
+.other-message {
+  background-color: #E9ECEF;
+  color: #212529;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* タイムスタンプやシステムメッセージの色を少し抑える */
+.item > span:first-child,
+.item > span[v-if*="enter"],
+.item > span[v-if*="exit"] {
+  color: #94A3B8;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .app {
-  background-color: rgb(79, 79, 79);
-  color: white
-}
-
-/* スライダー本体のスタイル */
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 120px;
-  height: 6px;
-  background: #cccccc;
-  outline: none;
-  border-radius: 3px;
-}
-
-/* スライダーのつまみ（Chrome, Safari, Opera, Edge） */
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #ffffff;
-  border: 2px solid #888888;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* スライダーのつまみ（Firefox） */
-.slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #ffffff;
-  border: 2px solid #888888;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.inpArea {
-  width: 70vw;
-  border: 3px solid #007FD4;
-  margin-top: 8px;
-  background-color: #9E9E9E;
+  background-color: #1E1E1E;
   color: white;
-  border-radius: 5px;
-}
-
-.app {
-  background-color: rgb(79, 79, 79);
-  color: white
 }
 
 /* スライダー本体のスタイル */
@@ -427,7 +403,8 @@ const onPipOut = (event) => {
 /* Markdownコンテンツのコンテナ */
 .markdown-body {
   line-height: 1.6;
-  padding-left: 8px; /* コンテナ全体に左パディングを追加 */
+  padding-left: 8px;
+  /* コンテナ全体に左パディングを追加 */
 }
 
 /* 段落 */
@@ -436,17 +413,23 @@ const onPipOut = (event) => {
 }
 
 /* 見出し */
-.markdown-body h1, .markdown-body h2, .markdown-body h3,
-.markdown-body h4, .markdown-body h5, .markdown-body h6 {
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
   margin: 1em 0 0.5em 0;
   font-weight: bold;
 }
 
 /* リスト */
-.markdown-body ul, .markdown-body ol {
+.markdown-body ul,
+.markdown-body ol {
   padding-left: 8px;
   /*margin: 0.5em 0;*/
-  /*list-style-position: inside;*/ /* 行頭記号を要素のボックス内に配置 */
+  /*list-style-position: inside;*/
+  /* 行頭記号を要素のボックス内に配置 */
 }
 
 .markdown-body li {
@@ -480,7 +463,9 @@ const onPipOut = (event) => {
   border-collapse: collapse;
   margin: 0.5em 0;
 }
-.markdown-body th, .markdown-body td {
+
+.markdown-body th,
+.markdown-body td {
   border: 1px solid #ccc;
   padding: 0.3em 0.5em;
 }
