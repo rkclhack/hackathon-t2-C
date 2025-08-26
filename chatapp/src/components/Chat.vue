@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // coputed追加
+import { inject, ref, reactive, onMounted, useTemplateRef, computed } from "vue" // computed追加
 import socketManager from '../socketManager.js'
 import { marked } from "marked"
 
@@ -18,6 +18,8 @@ const chatContent = ref("")
 const chatList = reactive([])
 // #endregion
 
+const pipFontSize = ref(16);
+
 const markdown = computed(() => {
   return marked.parse(chatContent.value)
 });
@@ -35,7 +37,7 @@ const onPublish = (event) => {
   const message = chatContent.value.trim()
 
   // Ctrl + Enter で送信
-  if (event instanceof KeyboardEvent && !event.ctrlKey) return;
+  if (event.key === 'Enter' && !event.ctrlKey) return;
 
   // メッセージが空文字でなければ、サーバーに送信する
   if (message) {
@@ -139,9 +141,7 @@ const body_scripts = document.body.cloneNode(true).querySelectorAll("script") //
 // Picture-in-Picture 状態
 const pipStatus = ref(false)
 const openPip = async () => {
-  const pipWindow = await window.documentPictureInPicture.requestWindow({
-    copyStyleSheets: true,
-  });
+  const pipWindow = await window.documentPictureInPicture.requestWindow({});
   pipWindow.document.body.append(pipRef.value);
   pipWindow.document.head.append(...styles); // 全てのstyle要素をPiPに張り付け
   pipWindow.document.head.append(...head_scripts); // headの全てのscript要素をPiPに張り付け
@@ -189,7 +189,7 @@ const onPipOut = (event) => {
     <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
     <button class="button-normal" @click="openPip">Picture-in-Picture Open</button>
     <div class="mt-10">
-      <p>ログインユーザ：{{ userName }}さん</p>
+      <p>ログインユーザ：{{ userName }}</p>
       <textarea variant="outlined" placeholder="投稿文を入力してください" rows="4" class="area" v-model="chatContent"
         @keydown.enter="onPublish"></textarea>
       <div class="mt-5">
@@ -226,7 +226,8 @@ const onPipOut = (event) => {
   <!-- Picture-in-Picture -->
   <div ref="pipRef" class="mx-auto my-5 px-4 pipWrapper">
     <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
-      <ul class="message-container" v-if="chatList.length !== 0">
+      <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1>
+      <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
         <li class="item mt-4" v-for="(chat, i) in chatList" :key="i"
           :class="{ 'my-message': (chat.type === 'publish' || chat.type === 'memo') && chat.name === userName }">
           <span v-if="chat.type === 'enter'">
@@ -248,6 +249,9 @@ const onPipOut = (event) => {
         <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="area" v-model="chatContent"
           @keydown.enter="onPublish"></textarea>
       </div>
+    </div>
+    <div class="font-slider-container">
+      <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
     </div>
   </div>
 </template>
@@ -306,5 +310,49 @@ const onPipOut = (event) => {
   background-color: lightyellow;
   padding: 8px;
   border-radius: 4px;
+}
+
+/* スライダーを配置するためのコンテナ */
+.font-slider-container {
+  position: absolute;
+  top: 20px;
+  /* 上からの位置 */
+  right: 20px;
+  /* 右からの位置 */
+  z-index: 10;
+  /* 他の要素より手前に表示 */
+}
+
+/* スライダー本体のスタイル */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: #cccccc;
+  outline: none;
+  border-radius: 3px;
+}
+
+/* スライダーのつまみ（Chrome, Safari, Opera, Edge） */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* スライダーのつまみ（Firefox） */
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
 }
 </style>
