@@ -103,12 +103,13 @@ const onReceiveExit = (data) => {
   chatList.unshift(data)
 }
 
-// サーバから受信した投稿メッセージを画面上に表示する
-const onReceivePublish = (data) => {
+// サーバから受信した休憩メッセージを画面上に表示する
+const onReceiveIdle = (data) => {
   chatList.unshift(data)
 }
 
-const onReceiveIdle = (data) => {
+// サーバから受信した投稿メッセージを画面上に表示する
+const onReceivePublish = (data) => {
   chatList.unshift(data)
 }
 // #endregion

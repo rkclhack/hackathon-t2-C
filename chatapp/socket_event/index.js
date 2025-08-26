@@ -18,7 +18,7 @@ const exitRoom = (name) => {
 }
 
 // 休憩中にする
-const idleMemeber = (name) => {
+const toggleIdleMemeber = (name) => {
   memberStatus[name] = "Idle";
 }
 
@@ -49,6 +49,7 @@ export default (io, socket) => {
     idleMemeber(data.name);
 
     history.push(data) // 履歴に追加
+    socket.emit("idleEvent", data)
     socket.broadcast.emit("idleEvent", data)
   })
 
