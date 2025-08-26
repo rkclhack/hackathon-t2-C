@@ -254,10 +254,10 @@ const onPipOut = (event) => {
             <span v-if="chat.type === 'exit'">
               {{ chat.name }}が退室しました。
             </span>
-            <span v-if="chat.type === 'publish'">
+            <div v-if="chat.type === 'publish'">
               {{ chat.name }}：
-              <span v-html="chat.content"></span>
-            </span>
+              <div class="markdown-body" v-html="chat.content"></div>
+            </div>
             <span v-if="chat.type === 'memo'">
               {{ chat.name }}のメモ：{{ chat.content }}
             </span>
@@ -348,7 +348,52 @@ const onPipOut = (event) => {
   color: white
 }
 
+/* スライダー本体のスタイル */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: #cccccc;
+  outline: none;
+  border-radius: 3px;
+}
 
+/* スライダーのつまみ（Chrome, Safari, Opera, Edge） */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* スライダーのつまみ（Firefox） */
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #888888;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.inpArea {
+  width: 70vw;
+  border: 3px solid #007FD4;
+  margin-top: 8px;
+  background-color: #9E9E9E;
+  color: white;
+  border-radius: 5px;
+}
+
+.app {
+  background-color: rgb(79, 79, 79);
+  color: white
+}
 
 /* スライダー本体のスタイル */
 .slider {
@@ -429,5 +474,77 @@ const onPipOut = (event) => {
 
 .float-btn:hover {
   transform: scale(1.1);
+}
+</style>
+
+<style>
+/* Markdownコンテンツのコンテナ */
+.markdown-body {
+  line-height: 1.6;
+  padding-left: 8px;
+  /* コンテナ全体に左パディングを追加 */
+}
+
+/* 段落 */
+.markdown-body p {
+  margin: 0.5em 0;
+}
+
+/* 見出し */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 1em 0 0.5em 0;
+  font-weight: bold;
+}
+
+/* リスト */
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 8px;
+  /*margin: 0.5em 0;*/
+  /*list-style-position: inside;*/
+  /* 行頭記号を要素のボックス内に配置 */
+}
+
+.markdown-body li {
+  margin: 0.2em 0;
+}
+
+/* 引用ブロック */
+.markdown-body blockquote {
+  border-left: 3px solid #ccc;
+  padding-left: 1em;
+  color: #666;
+  margin: 0.5em 0;
+}
+
+/* コードブロック */
+.markdown-body pre {
+  background-color: #f5f5f5;
+  padding: 0.5em;
+  overflow-x: auto;
+}
+
+/* インラインコード */
+.markdown-body code {
+  background-color: #f0f0f0;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+/* テーブル */
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #ccc;
+  padding: 0.3em 0.5em;
 }
 </style>
