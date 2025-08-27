@@ -266,8 +266,8 @@ const onPipOut = (event) => {
         </li>
       </ul>
       <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
-        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea"
-          v-model="chatContent" @keydown.enter="onPublish"></textarea>
+        <textarea variant="outlined" :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
+          @keydown.enter="onPublish"></textarea>
         <v-btn color="grey dark" style="margin-left: 5px;" @click="onPublish">
           <v-icon right>mdi-send</v-icon>
         </v-btn>
@@ -446,8 +446,7 @@ const onPipOut = (event) => {
 /* Markdownコンテンツのコンテナ */
 .markdown-body {
   line-height: 1.6;
-  padding-left: 8px;
-  /* コンテナ全体に左パディングを追加 */
+  padding-left: 8px; /* コンテナ全体に左パディングを追加 */
 }
 
 /* 段落 */
@@ -456,23 +455,17 @@ const onPipOut = (event) => {
 }
 
 /* 見出し */
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
+.markdown-body h1, .markdown-body h2, .markdown-body h3,
+.markdown-body h4, .markdown-body h5, .markdown-body h6 {
   margin: 1em 0 0.5em 0;
   font-weight: bold;
 }
 
 /* リスト */
-.markdown-body ul,
-.markdown-body ol {
+.markdown-body ul, .markdown-body ol {
   padding-left: 8px;
   /*margin: 0.5em 0;*/
-  /*list-style-position: inside;*/
-  /* 行頭記号を要素のボックス内に配置 */
+  /*list-style-position: inside;*/ /* 行頭記号を要素のボックス内に配置 */
 }
 
 .markdown-body li {
@@ -507,8 +500,7 @@ const onPipOut = (event) => {
   margin: 0.5em 0;
 }
 
-.markdown-body th,
-.markdown-body td {
+.markdown-body th, .markdown-body td {
   border: 1px solid #ccc;
   padding: 0.3em 0.5em;
 }
