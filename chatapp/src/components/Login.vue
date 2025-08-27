@@ -41,13 +41,13 @@ const onEnter = () => {
 <template>
   <div class="login-container">
     <div class="login-form">
-      <h1 class="login-title">Vue.js Chat サンプル</h1>
+      <h1 class="login-title">DockTalk</h1>
       <div class="input-group">
         <label for="username">ユーザー名</label>
         <input type="text" id="username" class="input-field" v-model="inputUserName" @keyup.enter="onEnter" />
       </div>
       <button type="button" @click="onEnter" class="login-button">入室する</button>
-    </div>
+    </div>s
   </div>
 </template>
 
