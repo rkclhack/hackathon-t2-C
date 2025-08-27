@@ -191,11 +191,18 @@ setInterval(() => {
 }, 100);
 
 const mouseoverPip = ref(false);
+const focusPip = ref(false)
 const onPipOver = (event) => {
   mouseoverPip.value = true;
 }
 const onPipOut = (event) => {
   mouseoverPip.value = false;
+}
+const onPipFocusIn = (event) => {
+  focusPip.value = true;
+}
+const onPipFocusOut = (event) => {
+  focusPip.value = false;
 }
 </script>
 
@@ -255,7 +262,7 @@ const onPipOut = (event) => {
       <div class="font-slider-container">
         <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
       </div>
-      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
+      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut" @focusin="onPipFocusIn" @focusout="onPipFocusOut">
         <ul class="message-container px-4" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
           <li v-for="(chat, i) in chatList" :key="i">
             <div v-if="chat.type === 'enter' || chat.type === 'exit'" class="log-message">
@@ -274,7 +281,7 @@ const onPipOut = (event) => {
             </div>
           </li>
         </ul>
-        <div class="pipInputArea" v-show="mouseoverPip" style="padding-bottom: 10px;">
+        <div class="pipInputArea" v-show="mouseoverPip || focusPip" style="padding-bottom: 10px;">
           <div class="input-row">
             <textarea :placeholder="`ログインユーザ：${userName}`" rows="2" class="inpArea" v-model="chatContent"
               @keydown.enter.ctrl.prevent="onPublish"></textarea>
