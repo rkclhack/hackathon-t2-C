@@ -209,11 +209,11 @@ const onPipFocusOut = (event) => {
 <template>
   <v-app class="app">
     <v-app-bar app color="#24292e" dark>
+      <v-toolbar-title>DockTalk</v-toolbar-title>
+      <p class="ml-auto">ログインユーザ：{{ userName }}さん</p>
       <v-btn icon @click="onExit" to="/">
         <v-icon>mdi-logout</v-icon>
       </v-btn>
-      <v-toolbar-title>DockTalk</v-toolbar-title>
-      <p class="ml-auto">ログインユーザ：{{ userName }}さん</p>
     </v-app-bar>
 
     <div class="mx-auto chat" style="padding-top: 64px; padding-bottom: 10px;">
