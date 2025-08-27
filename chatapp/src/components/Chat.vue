@@ -208,8 +208,11 @@ const onPipFocusOut = (event) => {
 
 <template>
   <v-app class="app">
-    <v-app-bar app color="#24292e" dark>
-      <v-toolbar-title>DockTalk</v-toolbar-title>
+    <v-app-bar app color="#24292e" dark class="px-4">
+      <img src="/src/images/icon_login.svg" class="title-icon" />
+      <v-toolbar-title>
+        DockTalk
+      </v-toolbar-title>
       <p class="ml-auto">ログインユーザ：{{ userName }}さん</p>
       <v-btn icon @click="onExit" to="/">
         <v-icon>mdi-logout</v-icon>
@@ -524,6 +527,11 @@ ul {
 
 .float-btn:hover {
   transform: scale(1.1);
+}
+
+.title-icon {
+  width: 2rem;
+  height: 2rem;
 }
 
 .pip-btn-icon {
