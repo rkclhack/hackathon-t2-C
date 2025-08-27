@@ -206,8 +206,8 @@ const onPipOut = (event) => {
       <p class="ml-auto">ログインユーザ：{{ userName }}さん</p>
     </v-app-bar>
 
-    <div class="mx-auto my-5 px-4 chat" style="padding-top: 64px; padding-bottom: 10px;">
-      <div class="mt-10">
+    <div class="mx-auto chat" style="padding-top: 64px; padding-bottom: 10px;">
+      <div>
         <div class="mt-5" v-if="chatList.length !== 0">
           <ul class="main-message-container">
             <li v-for="(chat, i) in chatList" :key="i">
@@ -248,12 +248,12 @@ const onPipOut = (event) => {
     </v-btn>
 
     <!-- Picture-in-Picture -->
-    <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
+    <div ref="pipRef" class="mx-auto pipWrapper" v-show="pipStatus">
       <div class="font-slider-container">
         <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
       </div>
       <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut">
-        <ul class="message-container" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
+        <ul class="message-container px-4" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
           <li v-for="(chat, i) in chatList" :key="i">
             <div v-if="chat.type === 'enter' || chat.type === 'exit'" class="log-message">
               <span>{{ chat.name }}が{{ chat.type === 'enter' ? '入室' : '退室' }}しました。</span>
@@ -263,7 +263,7 @@ const onPipOut = (event) => {
               :class="{ 'my-message': chat.name === userName, 'other-message': chat.name !== userName }">
               <div class="user-info">
                 <span class="user-name">{{ chat.name }}</span>
-                </div>
+              </div>
               <div class="message-bubble">
                 <div v-if="chat.type === 'publish'" class="markdown-body" v-html="chat.content"></div>
                 <span v-if="chat.type === 'memo'">メモ：{{ chat.content }}</span>
@@ -366,8 +366,10 @@ ul {
 /* PiP用スタイル調整 */
 .pipWrapper .log-message,
 .pipWrapper .message-item {
-  margin-bottom: 4px; /* PiPでは少し詰める */
+  margin-bottom: 4px;
+  /* PiPでは少し詰める */
 }
+
 .pipWrapper .log-message {
   font-size: 0.9em;
 }
@@ -415,7 +417,8 @@ ul {
   overflow-y: auto;
   flex-direction: column;
   justify-content: flex-end;
-  height: calc(100vh - 223px);
+  height: calc(100vh - 230px);
+  padding-right: 8px;
 }
 
 .message-container {
@@ -424,6 +427,7 @@ ul {
   flex-direction: column;
   justify-content: flex-end;
   min-height: 0;
+  padding-right: 8px;
 }
 
 .pipInputArea {
@@ -463,6 +467,7 @@ ul {
 
 .input-row {
   margin-top: 1em;
+  margin-left: 1em;
   display: flex;
   align-items: end;
   gap: 8px;
