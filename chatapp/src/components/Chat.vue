@@ -148,6 +148,9 @@ const openPip = async () => {
   pipWindow.document.head.append(...head_scripts); // headの全てのscript要素をPiPに張り付け
   pipWindow.document.body.append(...body_scripts); // bodyの全てのscript要素をPiPに張り付け
 
+  // pipのスクロールバー非表示
+  pipWindow.document.documentElement.style["overflow"] = "hidden";
+
   pipStatus.value = true;
   // Picture-in-Picture 終了時のイベント登録
   pipWindow.addEventListener('pagehide', (event) => {
@@ -428,6 +431,7 @@ ul {
   justify-content: flex-end;
   min-height: 0;
   padding-right: 8px;
+  scrollbar-width: thin;
 }
 
 .pipInputArea {
