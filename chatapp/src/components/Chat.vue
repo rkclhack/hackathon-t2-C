@@ -254,7 +254,8 @@ const onPipFocusOut = (event) => {
     </div>
 
     <v-btn fixed bottom right color="#007FD4" @click="openPip" class="float-btn">
-      <v-icon>mdi-open-in-new</v-icon>
+      <!-- <v-icon>mdi-open-in-new</v-icon> -->
+      <img src="/src/images/icon_button.svg" alt="open Picture-in-Picture talk window" class="pip-btn-icon" />
     </v-btn>
 
     <!-- Picture-in-Picture -->
@@ -262,7 +263,8 @@ const onPipFocusOut = (event) => {
       <div class="font-slider-container">
         <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
       </div>
-      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut" @focusin="onPipFocusIn" @focusout="onPipFocusOut">
+      <div class="pipFlexLayout" @mouseover="onPipOver" @mouseout="onPipOut" @focusin="onPipFocusIn"
+        @focusout="onPipFocusOut">
         <ul class="message-container px-4" v-if="chatList.length !== 0" :style="{ fontSize: pipFontSize + 'px' }">
           <li v-for="(chat, i) in chatList" :key="i">
             <div v-if="chat.type === 'enter' || chat.type === 'exit'" class="log-message">
@@ -522,6 +524,11 @@ ul {
 
 .float-btn:hover {
   transform: scale(1.1);
+}
+
+.pip-btn-icon {
+  width: 50px;
+  height: 50px;
 }
 </style>
 
