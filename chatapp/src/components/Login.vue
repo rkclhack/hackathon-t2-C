@@ -41,7 +41,10 @@ const onEnter = () => {
 <template>
   <div class="login-container">
     <div class="login-form">
-      <h1 class="login-title">DockTalk</h1>
+      <div class="title-area">
+        <img src="/src/images/icon_login.svg" class="title-icon" />
+        <h1 class="login-title">DockTalk</h1>
+      </div>
       <div class="input-group">
         <label for="username">ユーザー名</label>
         <input type="text" id="username" class="input-field" v-model="inputUserName" @keyup.enter="onEnter" />
@@ -52,6 +55,17 @@ const onEnter = () => {
 </template>
 
 <style scoped>
+.title-area {
+display: flex;
+align-items: center;
+margin-bottom: 24px;
+}
+.title-icon {
+width: 40px;
+height: 40px;
+margin-right: 12px;
+}
+
 .login-container {
   display: flex;
   justify-content: center;
@@ -73,7 +87,6 @@ const onEnter = () => {
   color: #f8fafc;
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 24px;
   text-align: center;
 }
 
