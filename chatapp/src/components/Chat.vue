@@ -65,7 +65,7 @@ const onExit = () => {
 // メモを画面上に表示する
 const onMemo = () => {
   // メモの内容を表示
-  chatList.unshift({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
+  chatList.push({ type: "memo", name: userName.value, content: chatContent.value, datetime: Date.now() })
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -75,19 +75,19 @@ const onMemo = () => {
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
   onUpdateChatList()
 }
 // #endregion
@@ -118,7 +118,7 @@ const registerSocketEvent = () => {
   socket.on("historyEvent", (data) => {
     // 履歴を画面上に表示
     data.forEach((chat) => {
-      chatList.unshift(chat)
+      chatList.push(chat)
     })
   })
 }
@@ -176,6 +176,17 @@ const openPip = async () => {
   }, 100);
 }
 
+const mainLastChildElementCount = ref(0);
+setInterval(() => {
+  const ms = document.querySelector(".main-message-container");
+  if (!ms) return;
+  const currentChildElementCount = ms.childElementCount;
+  if (currentChildElementCount !== mainLastChildElementCount.value) {
+    mainLastChildElementCount.value = currentChildElementCount;
+    ms.scroll(0, 99999);
+  }
+}, 100);
+
 const mouseoverPip = ref(false);
 const onPipOver = (event) => {
   mouseoverPip.value = true;
@@ -198,7 +209,7 @@ const onPipOut = (event) => {
     <div class="mx-auto my-5 px-4 chat" style="padding-top: 64px; padding-bottom: 10px;">
       <div class="mt-10">
         <div class="mt-5" v-if="chatList.length !== 0">
-          <ul>
+          <ul class="main-message-container">
             <li v-for="(chat, i) in chatList" :key="i">
               <div v-if="chat.type === 'enter' || chat.type === 'exit'" class="log-message">
                 <span>{{ chat.name }}が{{ chat.type === 'enter' ? '入室' : '退室' }}しました。</span>
@@ -236,6 +247,7 @@ const onPipOut = (event) => {
       <v-icon>mdi-open-in-new</v-icon>
     </v-btn>
 
+    <!-- Picture-in-Picture -->
     <div ref="pipRef" class="mx-auto px-4 pipWrapper" v-show="pipStatus">
       <div class="font-slider-container">
         <input type="range" min="10" max="24" v-model="pipFontSize" class="slider">
@@ -396,6 +408,14 @@ ul {
   flex-direction: column;
   height: calc(100% - 40px);
   min-height: 0;
+}
+
+.main-message-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: calc(100vh - 223px);
 }
 
 .message-container {
