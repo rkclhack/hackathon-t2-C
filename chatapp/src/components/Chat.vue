@@ -191,7 +191,7 @@ const onPipOut = (event) => {
       <v-btn icon @click="onExit" to="/">
         <v-icon>mdi-logout</v-icon>
       </v-btn>
-      <v-toolbar-title>Vue.js Chat チャットルーム</v-toolbar-title>
+      <v-toolbar-title>DockTalk</v-toolbar-title>
       <p class="ml-auto">ログインユーザ：{{ userName }}さん</p>
     </v-app-bar>
 
